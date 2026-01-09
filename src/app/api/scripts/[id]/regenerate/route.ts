@@ -19,6 +19,8 @@ import { AI_CONFIG, SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompts";
 import { regenerateRequestSchema } from "@/lib/validations";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 interface Script {
   angle: "Pain Point" | "Benefit" | "Social Proof";
   script: string;

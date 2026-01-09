@@ -12,6 +12,8 @@ import { ratingRequestSchema } from "@/lib/validations";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export const POST = withErrorHandler(
   async (request: Request, context?: unknown) => {
     const { id } = await (context as RouteContext<{ id: string }>).params;

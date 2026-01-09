@@ -11,6 +11,8 @@ import { favoriteRequestSchema } from "@/lib/validations";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export const GET = withErrorHandler(async () => {
   const session = await auth();
 

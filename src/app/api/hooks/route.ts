@@ -6,7 +6,7 @@ import { createDb } from "@/lib/db";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getHooks } from "@/lib/services/hooks";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const GET = withErrorHandler(async (request: Request) => {
   const url = new URL(request.url);

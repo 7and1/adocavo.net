@@ -19,6 +19,8 @@ import { checkRateLimit, type RateLimitIdentifier } from "@/lib/rate-limit";
 import { generateScripts } from "@/lib/services/generation";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export const POST = withErrorHandler(async (request: Request) => {
   const session = await auth();
   if (!session?.user?.id) {

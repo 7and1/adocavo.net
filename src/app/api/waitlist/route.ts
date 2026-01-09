@@ -8,6 +8,8 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { waitlist as waitlistTable } from "@/lib/schema";
 import { nanoid } from "nanoid";
 
+export const dynamic = "force-dynamic";
+
 function deriveUserTier(credits?: number | null) {
   if (credits == null) return "anon";
   if (credits <= 0) return "out_of_credits";

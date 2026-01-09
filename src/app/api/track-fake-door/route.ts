@@ -8,6 +8,8 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { fakeDoorClicks } from "@/lib/schema";
 import { nanoid } from "nanoid";
 
+export const dynamic = "force-dynamic";
+
 export const POST = withErrorHandler(async (request: Request) => {
   const body = await request.json().catch(() => {
     throw new ValidationError();

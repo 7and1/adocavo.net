@@ -5,6 +5,8 @@ import { createDb } from "@/lib/db";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getHookById } from "@/lib/services/hooks";
 
+export const dynamic = "force-dynamic";
+
 export const GET = withErrorHandler(async (request: Request, context) => {
   const { params } = context as { params: { id: string } };
   const env = getBindings();
