@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Build with OpenNext
-        run: npm run build
+        run: npm run build && npm run build:open-next
         env:
           NEXTAUTH_URL: https://adocavo.net
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
