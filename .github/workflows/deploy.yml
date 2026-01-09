@@ -26,6 +26,48 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create wrangler.toml
+        run: |
+          cat > wrangler.toml << 'EOF'
+          name = "adocavo-net"
+          main = ".open-next/worker.js"
+          compatibility_date = "2026-01-09"
+          compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+          account_id = "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+
+          [assets]
+          directory = ".open-next/assets"
+          binding = "ASSETS"
+
+          [[kv_namespaces]]
+          binding = "NEXT_INC_CACHE_KV"
+          id = "${{ secrets.NEXT_INC_CACHE_KV_ID }}"
+          preview_id = "${{ secrets.NEXT_INC_CACHE_KV_PREVIEW_ID }}"
+
+          [[kv_namespaces]]
+          binding = "NEXT_TAG_CACHE_KV"
+          id = "${{ secrets.NEXT_TAG_CACHE_KV_ID }}"
+          preview_id = "${{ secrets.NEXT_TAG_CACHE_KV_PREVIEW_ID }}"
+
+          [[services]]
+          binding = "WORKER_SELF_REFERENCE"
+          service = "adocavo-net"
+
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "adocavo-db"
+          database_id = "${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}"
+
+          [ai]
+          binding = "AI"
+
+          [vars]
+          NEXTAUTH_URL = "https://adocavo.net"
+          NODE_ENV = "production"
+          AI_MODEL_SIZE = "8b"
+          AI_STREAMING = "false"
+          EOF
+
       - name: Build with OpenNext
         run: npm run build && npm run build:open-next
         env:
@@ -36,7 +78,7 @@ jobs:
           GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
 
-      - name: Create wrangler.toml
+      - name: Recreate wrangler.toml (ensure latest)
         run: |
           cat > wrangler.toml << 'EOF'
           name = "adocavo-net"
