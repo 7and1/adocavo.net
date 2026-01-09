@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#faf5ff" />
+      <stop offset="100%" stop-color="#e9d5ff" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="980" cy="-40" r="240" fill="#a855f7" opacity="0.2" />
+  <circle cx="-60" cy="520" r="240" fill="#14b8a6" opacity="0.2" />
+  <g font-family="Inter, system-ui, sans-serif" fill="#111827">
+    <text x="90" y="240" font-size="60" font-weight="700">Adocavo Intelligence</text>
+    <text x="90" y="320" font-size="32" fill="#374151">Viral TikTok Hooks + AI Script Generator</text>
+    <text x="90" y="400" font-size="24" fill="#6b7280">Generate 3 high-converting scripts in seconds</text>
+  </g>
+</svg>

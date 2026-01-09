@@ -1,0 +1,142 @@
+[
+  {
+    "id": "hook_001",
+    "text": "Stop scrolling if you have acne",
+    "category": "beauty",
+    "engagementScore": 95,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_002",
+    "text": "This is your sign to start that side hustle",
+    "category": "finance",
+    "engagementScore": 92,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_003",
+    "text": "Wait til the end, trust me",
+    "category": "food",
+    "engagementScore": 90,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_004",
+    "text": "I wish I knew this hack before spending $500",
+    "category": "tech",
+    "engagementScore": 88,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_005",
+    "text": "POV: you finally fixed your sleep schedule",
+    "category": "fitness",
+    "engagementScore": 84,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_006",
+    "text": "No one tells you this about pet hair",
+    "category": "pets",
+    "engagementScore": 83,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_007",
+    "text": "If you're still doing skincare like this, please stop",
+    "category": "beauty",
+    "engagementScore": 89,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_008",
+    "text": "This app saved me 10 hours a week",
+    "category": "tech",
+    "engagementScore": 87,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_009",
+    "text": "My gym routine changed after this",
+    "category": "fitness",
+    "engagementScore": 82,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_010",
+    "text": "The $20 gadget every remote worker needs",
+    "category": "tech",
+    "engagementScore": 86,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_011",
+    "text": "I tried this meal prep trick for 7 days",
+    "category": "food",
+    "engagementScore": 81,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_012",
+    "text": "Your dog will thank you for this",
+    "category": "pets",
+    "engagementScore": 85,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_013",
+    "text": "The money move I made at 25",
+    "category": "finance",
+    "engagementScore": 88,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_014",
+    "text": "The 3-second trick to cleaner counters",
+    "category": "food",
+    "engagementScore": 79,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_015",
+    "text": "I replaced my coffee with this",
+    "category": "fitness",
+    "engagementScore": 80,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_016",
+    "text": "The easiest way to make your room look expensive",
+    "category": "tech",
+    "engagementScore": 77,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_017",
+    "text": "If you're tired of breakouts, listen up",
+    "category": "beauty",
+    "engagementScore": 86,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_018",
+    "text": "Budgeting made simple for busy people",
+    "category": "finance",
+    "engagementScore": 81,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_019",
+    "text": "This is why your cat keeps scratching",
+    "category": "pets",
+    "engagementScore": 78,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_020",
+    "text": "I finally found a lunch that keeps me full",
+    "category": "food",
+    "engagementScore": 80,
+    "source": "manual_curation"
+  }
+]

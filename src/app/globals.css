@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  @apply min-h-screen bg-white font-sans text-gray-900 antialiased;
+}
+
+a {
+  @apply text-inherit no-underline;
+}
+
+.prose :where(a):not(:where([class~="not-prose"] *)) {
+  @apply text-primary-600 hover:text-primary-700;
+}

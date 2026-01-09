@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+.open-next/
+out/
+.env*
+.dev.vars
+!.env.example
+.wrangler/
+.DS_Store
+wrangler.toml.local
+
+# Security: exclude actual wrangler.toml (contains account_id)
+wrangler.toml

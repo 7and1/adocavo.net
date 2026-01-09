@@ -1,0 +1,80 @@
+name = "adocavo-net"
+main = ".open-next/worker.js"
+compatibility_date = "2026-01-09"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+# KV Namespaces for Next.js caching
+# Create production: wrangler kv namespace create NEXT_INC_CACHE_KV
+# Create preview: wrangler kv namespace create NEXT_INC_CACHE_KV --preview
+[[kv_namespaces]]
+binding = "NEXT_INC_CACHE_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_KV_PREVIEW_ID"
+
+# Create production: wrangler kv namespace create NEXT_TAG_CACHE_KV
+# Create preview: wrangler kv namespace create NEXT_TAG_CACHE_KV --preview
+[[kv_namespaces]]
+binding = "NEXT_TAG_CACHE_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_KV_PREVIEW_ID"
+
+[[services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "adocavo-net"
+
+# D1 Database - Primary data storage
+# Create: wrangler d1 create adocavo-db
+# Then paste the database_id below
+[[d1_databases]]
+binding = "DB"
+database_name = "adocavo-db"
+database_id = "" # Fill after: wrangler d1 create adocavo-db
+
+# AI Binding - Workers AI for script generation
+[ai]
+binding = "AI"
+
+# Environment variables
+[vars]
+NEXTAUTH_URL = "https://adocavo.net"
+NODE_ENV = "production"
+AI_MODEL_SIZE = "8b"
+AI_STREAMING = "false"
+
+[env.preview]
+name = "adocavo-preview"
+
+[[env.preview.services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "adocavo-preview"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "adocavo-db-preview"
+database_id = "" # Fill after: wrangler d1 create adocavo-db-preview
+
+[env.preview.vars]
+NEXTAUTH_URL = "https://preview.adocavo.net"
+AI_MODEL_SIZE = "8b"
+AI_STREAMING = "false"
+
+[env.development]
+name = "adocavo-dev"
+
+[[env.development.services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "adocavo-dev"
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "adocavo-db-dev"
+database_id = "" # Fill after: wrangler d1 create adocavo-db-dev
+
+[env.development.vars]
+NEXTAUTH_URL = "http://localhost:3000"
+AI_MODEL_SIZE = "8b"
+AI_STREAMING = "false"
