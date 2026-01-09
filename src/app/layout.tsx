@@ -1,21 +1,6 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/Providers";
-import { Toaster } from "@/components/ui/toaster";
-import { Analytics } from "@/components/Analytics";
 import "./globals.css";
-
-const space = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space",
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -87,17 +72,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${space.variable} ${jetbrains.variable}`}>
+    <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="canonical" href="https://adocavo.net" />
       </head>
       <body className="min-h-screen bg-white font-sans antialiased">
-        <Providers>
-          {children}
-          <Toaster />
-        </Providers>
-        <Analytics />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
