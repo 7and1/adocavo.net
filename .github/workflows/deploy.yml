@@ -1,31 +1,90 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Cloudflare Workers
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 env:
   NODE_VERSION: "20"
 
 jobs:
-  deploy:
+  deploy-preview:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
-
       - name: Install dependencies
         run: npm ci
+      - name: Create wrangler.toml
+        run: |
+          cat > wrangler.toml << 'EOF'
+          name = "adocavo-preview"
+          main = ".open-next/worker.js"
+          compatibility_date = "2026-01-09"
+          compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
+          [assets]
+          directory = ".open-next/assets"
+          binding = "ASSETS"
+
+          [[kv_namespaces]]
+          binding = "NEXT_INC_CACHE_KV"
+          id = "${{ secrets.NEXT_INC_CACHE_KV_PREVIEW_ID }}"
+          preview_id = "${{ secrets.NEXT_INC_CACHE_KV_PREVIEW_ID }}"
+
+          [[kv_namespaces]]
+          binding = "NEXT_TAG_CACHE_KV"
+          id = "${{ secrets.NEXT_TAG_CACHE_KV_PREVIEW_ID }}"
+          preview_id = "${{ secrets.NEXT_TAG_CACHE_KV_PREVIEW_ID }}"
+
+          [[services]]
+          binding = "WORKER_SELF_REFERENCE"
+          service = "adocavo-preview"
+
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "adocavo-db-preview"
+          database_id = "${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}"
+
+          [ai]
+          binding = "AI"
+
+          [vars]
+          NEXTAUTH_URL = "https://preview.adocavo.net"
+          NODE_ENV = "production"
+          EOF
+      - name: Build
+        run: |
+          npm run build
+          npm run build:open-next
+        env:
+          NEXTAUTH_URL: https://preview.adocavo.net
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
       - name: Create wrangler.toml
         run: |
           cat > wrangler.toml << 'EOF'
@@ -33,7 +92,6 @@ jobs:
           main = ".open-next/worker.js"
           compatibility_date = "2026-01-09"
           compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
-          account_id = "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
 
           [assets]
           directory = ".open-next/assets"
@@ -64,64 +122,24 @@ jobs:
           [vars]
           NEXTAUTH_URL = "https://adocavo.net"
           NODE_ENV = "production"
-          AI_MODEL_SIZE = "8b"
-          AI_STREAMING = "false"
           EOF
-
-      - name: Build with OpenNext
-        run: npm run build && npm run build:open-next
+      - name: Run database migrations
+        run: npx wrangler d1 migrations apply adocavo-db --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Build
+        run: |
+          npm run build
+          npm run build:open-next
         env:
           NEXTAUTH_URL: https://adocavo.net
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
-
-      - name: Recreate wrangler.toml (ensure latest)
-        run: |
-          cat > wrangler.toml << 'EOF'
-          name = "adocavo-net"
-          main = ".open-next/worker.js"
-          compatibility_date = "2026-01-09"
-          compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
-          account_id = "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-
-          [assets]
-          directory = ".open-next/assets"
-          binding = "ASSETS"
-
-          [[kv_namespaces]]
-          binding = "NEXT_INC_CACHE_KV"
-          id = "${{ secrets.NEXT_INC_CACHE_KV_ID }}"
-          preview_id = "${{ secrets.NEXT_INC_CACHE_KV_PREVIEW_ID }}"
-
-          [[kv_namespaces]]
-          binding = "NEXT_TAG_CACHE_KV"
-          id = "${{ secrets.NEXT_TAG_CACHE_KV_ID }}"
-          preview_id = "${{ secrets.NEXT_TAG_CACHE_KV_PREVIEW_ID }}"
-
-          [[services]]
-          binding = "WORKER_SELF_REFERENCE"
-          service = "adocavo-net"
-
-          [[d1_databases]]
-          binding = "DB"
-          database_name = "adocavo-db"
-          database_id = "${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}"
-
-          [ai]
-          binding = "AI"
-
-          [vars]
-          NEXTAUTH_URL = "https://adocavo.net"
-          NODE_ENV = "production"
-          AI_MODEL_SIZE = "8b"
-          AI_STREAMING = "false"
-          EOF
-
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Notify deployment
+        run: |
+          echo "Deployed to production: https://adocavo.net"
