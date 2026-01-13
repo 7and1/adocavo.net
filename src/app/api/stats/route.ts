@@ -4,8 +4,6 @@ import { drizzle } from "drizzle-orm/d1";
 import { users, generatedScripts, scriptRatings } from "@/lib/schema";
 import { count, avg } from "drizzle-orm";
 
-export const runtime = "edge";
-
 export async function GET() {
   try {
     const env = getBindings();
