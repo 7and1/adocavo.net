@@ -3,7 +3,7 @@ import { AppError, RateLimitError } from "@/lib/errors";
 import { hooksQuerySchema } from "@/lib/validations";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
 import { getHooks } from "@/lib/services/hooks";
 
 export const dynamic = "force-dynamic";
@@ -19,8 +19,8 @@ export const GET = withErrorHandler(async (request: Request) => {
   }
 
   const db = createDb(env.DB as D1Database);
-  const ip = getClientIp(request);
-  const rate = await checkRateLimit(db, ip, "hooks");
+  const { identifier, tier } = await getRateLimitContext(request);
+  const rate = await checkRateLimit(db, identifier, "hooks", tier);
 
   if (!rate.allowed) {
     throw new RateLimitError(rate.retryAfter);

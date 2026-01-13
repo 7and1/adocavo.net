@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { CreditBalance } from "@/components/CreditBalance";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, Heart } from "lucide-react";
 
 export interface HeaderProps {
   showCredits?: boolean;
@@ -14,17 +14,35 @@ export interface HeaderProps {
 export function Header({ showCredits = true }: HeaderProps) {
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
+      // Focus first menu item when menu opens
+      const firstLink = mobileMenuRef.current?.querySelector("a");
+      firstLink?.focus();
     } else {
       document.body.style.overflow = "";
+      // Return focus to menu button when menu closes
+      menuButtonRef.current?.focus();
     }
     return () => {
       document.body.style.overflow = "";
     };
+  }, [mobileMenuOpen]);
+
+  // Close menu on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [mobileMenuOpen]);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -55,23 +73,50 @@ export function Header({ showCredits = true }: HeaderProps) {
           >
             <Link
               href="/"
+              prefetch
               className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1"
             >
               Hook Library
             </Link>
             <Link
+              href="/examples"
+              prefetch
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1"
+            >
+              Examples
+            </Link>
+            <Link
               href="/blog"
+              prefetch
               className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1"
             >
               Blog
             </Link>
+            <Link
+              href="/pricing"
+              prefetch
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1"
+            >
+              Pricing
+            </Link>
             {session && (
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1"
-              >
-                My Scripts
-              </Link>
+              <>
+                <Link
+                  href="/favorites"
+                  prefetch
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1 flex items-center gap-1"
+                >
+                  <Heart className="h-4 w-4" />
+                  Favorites
+                </Link>
+                <Link
+                  href="/dashboard"
+                  prefetch
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1"
+                >
+                  My Scripts
+                </Link>
+              </>
             )}
           </nav>
 
@@ -94,8 +139,9 @@ export function Header({ showCredits = true }: HeaderProps) {
             )}
 
             <button
+              ref={menuButtonRef}
               type="button"
-              className="md:hidden p-2 text-gray-600 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"
+              className="md:hidden p-3 h-11 min-w-[44px] text-gray-600 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors flex items-center justify-center"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
@@ -124,11 +170,12 @@ export function Header({ showCredits = true }: HeaderProps) {
       {/* Mobile menu */}
       <div
         id="mobile-menu"
+        ref={mobileMenuRef}
         className={cn(
           "md:hidden border-t border-gray-200 bg-white",
           "transition-all duration-300 ease-in-out",
           mobileMenuOpen
-            ? "max-h-64 opacity-100"
+            ? "max-h-96 opacity-100"
             : "max-h-0 opacity-0 pointer-events-none",
         )}
       >
@@ -138,26 +185,56 @@ export function Header({ showCredits = true }: HeaderProps) {
         >
           <Link
             href="/"
-            className="px-3 py-2 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+            prefetch
+            className="min-h-[48px] px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center"
             onClick={closeMobileMenu}
           >
             Hook Library
           </Link>
           <Link
+            href="/examples"
+            prefetch
+            className="min-h-[48px] px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center"
+            onClick={closeMobileMenu}
+          >
+            Examples
+          </Link>
+          <Link
             href="/blog"
-            className="px-3 py-2 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+            prefetch
+            className="min-h-[48px] px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center"
             onClick={closeMobileMenu}
           >
             Blog
           </Link>
+          <Link
+            href="/pricing"
+            prefetch
+            className="min-h-[48px] px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center"
+            onClick={closeMobileMenu}
+          >
+            Pricing
+          </Link>
           {session && (
-            <Link
-              href="/dashboard"
-              className="px-3 py-2 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
-              onClick={closeMobileMenu}
-            >
-              My Scripts
-            </Link>
+            <>
+              <Link
+                href="/favorites"
+                prefetch
+                className="min-h-[48px] px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center gap-2"
+                onClick={closeMobileMenu}
+              >
+                <Heart className="h-4 w-4" />
+                Favorites
+              </Link>
+              <Link
+                href="/dashboard"
+                prefetch
+                className="min-h-[48px] px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center"
+                onClick={closeMobileMenu}
+              >
+                My Scripts
+              </Link>
+            </>
           )}
         </nav>
       </div>

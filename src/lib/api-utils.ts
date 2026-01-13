@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { isAppError } from "./errors";
+import { logError } from "./logger";
+import { extractRequestIds, createResponseHeaders } from "./logger";
 
 export interface APIResponse<T> {
   success: boolean;
@@ -113,15 +115,70 @@ export function withErrorHandler<T>(
     request: Request,
     context?: unknown,
   ) => Promise<NextResponse<APIResponse<T>>>,
+  requireAuth = false,
 ) {
   return async (
     request: Request,
     context?: unknown,
   ): Promise<NextResponse<APIResponse<T>>> => {
+    // Extract or generate request IDs for tracing
+    const { requestId, correlationId, traceId } = extractRequestIds(request);
+
     try {
-      return await handler(request, context);
+      // CSRF validation for non-GET requests
+      const method = request.method.toUpperCase();
+      if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
+        const isAuthenticated = requireAuth;
+        if (!validateCSRF(request, isAuthenticated)) {
+          const response = NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "CSRF_ERROR",
+                message: "Invalid origin. Please refresh and try again.",
+              },
+            },
+            { status: 403 },
+          ) as NextResponse<APIResponse<T>>;
+          // Add request ID headers
+          const headers = createResponseHeaders({
+            requestId,
+            correlationId: correlationId || crypto.randomUUID(),
+            traceId: traceId || crypto.randomUUID(),
+          });
+          headers.forEach((value, key) => response.headers.set(key, value));
+          return response;
+        }
+      }
+      const result = await handler(request, context);
+      // Add request ID headers to successful response
+      const headers = createResponseHeaders({
+        requestId,
+        correlationId: correlationId || crypto.randomUUID(),
+        traceId: traceId || crypto.randomUUID(),
+      });
+      headers.forEach((value, key) => result.headers.set(key, value));
+      return result;
     } catch (error) {
-      return errorResponse(error) as NextResponse<APIResponse<T>>;
+      const url = new URL(request.url);
+      logError("API handler error", error, {
+        route: url.pathname,
+        method: request.method,
+        requestId,
+        correlationId,
+        traceId,
+        userAgent: request.headers.get("user-agent") || undefined,
+        ip: request.headers.get("cf-connecting-ip") || undefined,
+      });
+      const errorResp = errorResponse(error) as NextResponse<APIResponse<T>>;
+      // Add request ID headers to error response
+      const headers = createResponseHeaders({
+        requestId,
+        correlationId: correlationId || crypto.randomUUID(),
+        traceId: traceId || crypto.randomUUID(),
+      });
+      headers.forEach((value, key) => errorResp.headers.set(key, value));
+      return errorResp;
     }
   };
 }
@@ -140,13 +197,16 @@ export function withAuthHandler<T>(
     request: Request,
     context?: unknown,
   ): Promise<NextResponse<APIResponse<T>>> => {
+    // Extract or generate request IDs for tracing
+    const { requestId, correlationId, traceId } = extractRequestIds(request);
+
     try {
       // Import auth dynamically to avoid edge runtime issues
       const { auth } = await import("@/lib/auth");
       const session = await auth();
 
       if (!session?.user?.id) {
-        return NextResponse.json(
+        const response = NextResponse.json(
           {
             success: false,
             error: {
@@ -156,11 +216,19 @@ export function withAuthHandler<T>(
           },
           { status: 401 },
         );
+        // Add request ID headers
+        const headers = createResponseHeaders({
+          requestId,
+          correlationId: correlationId || crypto.randomUUID(),
+          traceId: traceId || crypto.randomUUID(),
+        });
+        headers.forEach((value, key) => response.headers.set(key, value));
+        return response;
       }
 
       // Validate CSRF for authenticated state-changing requests
       if (!validateCSRF(request, true)) {
-        return NextResponse.json(
+        const response = NextResponse.json(
           {
             success: false,
             error: {
@@ -170,13 +238,47 @@ export function withAuthHandler<T>(
           },
           { status: 403 },
         );
+        // Add request ID headers
+        const headers = createResponseHeaders({
+          requestId,
+          correlationId: correlationId || crypto.randomUUID(),
+          traceId: traceId || crypto.randomUUID(),
+        });
+        headers.forEach((value, key) => response.headers.set(key, value));
+        return response;
       }
 
       // Attach session to request context for handler use
       (request as Request & { session?: typeof session }).session = session;
-      return await handler(request, context);
+      const result = await handler(request, context);
+      // Add request ID headers to successful response
+      const headers = createResponseHeaders({
+        requestId,
+        correlationId: correlationId || crypto.randomUUID(),
+        traceId: traceId || crypto.randomUUID(),
+      });
+      headers.forEach((value, key) => result.headers.set(key, value));
+      return result;
     } catch (error) {
-      return errorResponse(error) as NextResponse<APIResponse<T>>;
+      const url = new URL(request.url);
+      logError("Authenticated API handler error", error, {
+        route: url.pathname,
+        method: request.method,
+        requestId,
+        correlationId,
+        traceId,
+        userAgent: request.headers.get("user-agent") || undefined,
+        ip: request.headers.get("cf-connecting-ip") || undefined,
+      });
+      const errorResp = errorResponse(error) as NextResponse<APIResponse<T>>;
+      // Add request ID headers to error response
+      const headers = createResponseHeaders({
+        requestId,
+        correlationId: correlationId || crypto.randomUUID(),
+        traceId: traceId || crypto.randomUUID(),
+      });
+      headers.forEach((value, key) => errorResp.headers.set(key, value));
+      return errorResp;
     }
   };
 }

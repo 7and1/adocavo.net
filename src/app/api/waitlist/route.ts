@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { waitlistRequestSchema } from "@/lib/validations";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
 import { waitlist as waitlistTable } from "@/lib/schema";
 import { nanoid } from "nanoid";
 
@@ -30,15 +30,15 @@ export const POST = withErrorHandler(async (request: Request) => {
     throw new AppError("ENV_MISSING", "DB binding missing", 500);
   }
 
+  const session = await auth();
   const db = createDb(env.DB as D1Database);
-  const ip = getClientIp(request);
-  const rate = await checkRateLimit(db, ip, "waitlist");
+  const { identifier, tier } = await getRateLimitContext(request, session);
+  const rate = await checkRateLimit(db, identifier, "waitlist", tier);
 
   if (!rate.allowed) {
     throw new RateLimitError(rate.retryAfter);
   }
 
-  const session = await auth();
   const sourceUrl = parsed.sourceUrl || request.headers.get("referer") || null;
   const userTier = parsed.userTier || deriveUserTier(session?.user?.credits);
 

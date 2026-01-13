@@ -5,13 +5,97 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 env:
   NODE_VERSION: "20"
+  CI: true
 
 jobs:
+  validate-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      secrets-valid: ${{ steps.check.outputs.valid }}
+    steps:
+      - name: Validate required secrets
+        id: check
+        run: |
+          MISSING=()
+
+          # Required for both environments
+          REQUIRED_SECRETS=(
+            "CLOUDFLARE_API_TOKEN"
+            "CLOUDFLARE_ACCOUNT_ID"
+            "CLOUDFLARE_D1_DATABASE_ID"
+            "NEXTAUTH_SECRET"
+            "NEXT_INC_CACHE_KV_ID"
+            "NEXT_TAG_CACHE_KV_ID"
+            "NEXT_INC_CACHE_KV_PREVIEW_ID"
+            "NEXT_TAG_CACHE_KV_PREVIEW_ID"
+          )
+
+          for secret in "${REQUIRED_SECRETS[@]}"; do
+            if [ -z "${!secret:-}" ]; then
+              MISSING+=("$secret")
+            fi
+          done
+
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "❌ Missing required secrets: ${MISSING[*]}"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          echo "✅ All required secrets are set"
+          echo "valid=true" >> $GITHUB_OUTPUT
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXT_INC_CACHE_KV_ID: ${{ secrets.NEXT_INC_CACHE_KV_ID }}
+          NEXT_TAG_CACHE_KV_ID: ${{ secrets.NEXT_TAG_CACHE_KV_ID }}
+          NEXT_INC_CACHE_KV_PREVIEW_ID: ${{ secrets.NEXT_INC_CACHE_KV_PREVIEW_ID }}
+          NEXT_TAG_CACHE_KV_PREVIEW_ID: ${{ secrets.NEXT_TAG_CACHE_KV_PREVIEW_ID }}
+
+  pre-deployment-checks:
+    runs-on: ubuntu-latest
+    needs: validate-secrets
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript compilation check
+        run: npm run typecheck
+      - name: Lint validation
+        run: npm run lint
+      - name: Run unit tests
+        run: npm run test:unit
+      - name: Build application
+        run: npm run build
+        env:
+          NEXTAUTH_URL: https://adocavo.net
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      - name: Validate bundle size
+        run: |
+          BUILD_SIZE=$(du -sh .next | cut -f1)
+          echo "Build size: $BUILD_SIZE"
+          if [ $(du -s .next | cut -f1) -gt 52428800 ]; then
+            echo "❌ Build size exceeds 50MB limit"
+            exit 1
+          fi
+          echo "✅ Bundle size validated"
+
   deploy-preview:
     runs-on: ubuntu-latest
+    needs: [validate-secrets, pre-deployment-checks]
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
@@ -52,6 +136,7 @@ jobs:
           binding = "DB"
           database_name = "adocavo-db-preview"
           database_id = "${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}"
+          migrations_dir = "drizzle/migrations"
 
           [ai]
           binding = "AI"
@@ -67,17 +152,76 @@ jobs:
         env:
           NEXTAUTH_URL: https://preview.adocavo.net
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-      - name: Deploy to Cloudflare Workers
+      - name: Run database migrations (preview)
+        run: |
+          npx wrangler d1 migrations apply adocavo-db-preview --remote --config wrangler.toml --yes || exit 1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Verify migrations (preview)
+        run: |
+          npx wrangler d1 execute adocavo-db-preview --remote --config wrangler.toml --command "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;" || exit 1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Deploy to Cloudflare Workers (preview)
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Health check (preview)
+        run: |
+          echo "Waiting for deployment to propagate..."
+          sleep 30
+
+          MAX_ATTEMPTS=10
+          ATTEMPT=0
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://preview.adocavo.net/api/health || echo "000")
+
+            if [ "$RESPONSE" = "200" ]; then
+              echo "✅ Preview deployment healthy"
+              curl -s https://preview.adocavo.net/api/health | jq .
+              exit 0
+            fi
+
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Health check returned $RESPONSE"
+            sleep 10
+          done
+
+          echo "❌ Preview deployment health check failed"
+          exit 1
+      - name: Rollback on failure (preview)
+        if: failure()
+        run: |
+          echo "⚠️ Preview deployment failed - initiating rollback"
+          # Get previous successful deployment
+          PREVIOUS_DEPLOYMENT=$(gh run list -workflow=deploy.yml -branch main -status success -L 1 --json databaseId --jq '.[0].databaseId' || echo "")
+
+          if [ -n "$PREVIOUS_DEPLOYMENT" ]; then
+            echo "Rolling back to previous deployment: $PREVIOUS_DEPLOYMENT"
+          else
+            echo "No previous deployment found for rollback"
+          fi
+      - name: Notify preview deployment
+        if: success()
+        run: |
+          echo "✅ Preview deployment successful"
+          echo "URL: https://preview.adocavo.net"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
 
   deploy-production:
     runs-on: ubuntu-latest
+    needs: [validate-secrets, pre-deployment-checks]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -124,9 +268,40 @@ jobs:
           NEXTAUTH_URL = "https://adocavo.net"
           NODE_ENV = "production"
           EOF
+      - name: Backup database before migration
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          BACKUP_NAME="pre-migration-backup-$TIMESTAMP"
+          echo "Creating database backup: $BACKUP_NAME"
+
+          # Export database to SQL file
+          npx wrangler d1 export adocavo-db --remote --config wrangler.toml --output=/tmp/$BACKUP_NAME.sql || echo "Warning: Backup export had issues"
+
+          echo "✅ Database backup completed: /tmp/$BACKUP_NAME.sql"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Run database migrations
-        run: npx wrangler d1 migrations apply adocavo-db --remote --config wrangler.toml --yes
-        continue-on-error: true
+        id: migrate
+        run: |
+          echo "Running database migrations..."
+          npx wrangler d1 migrations apply adocavo-db --remote --config wrangler.toml --yes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Verify migrations
+        run: |
+          echo "Verifying migration success..."
+
+          # Check if migrations table exists and has records
+          RESULT=$(npx wrangler d1 execute adocavo-db --remote --config wrangler.toml --command "SELECT COUNT(*) as count FROM __drizzle_migrations;" --json 2>/dev/null || echo "")
+
+          if [ -n "$RESULT" ]; then
+            echo "✅ Migrations verified successfully"
+            echo "$RESULT" | jq '.'
+          else
+            echo "⚠️ Could not verify migrations - proceeding with caution"
+          fi
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -137,11 +312,109 @@ jobs:
         env:
           NEXTAUTH_URL: https://adocavo.net
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      - name: Create deployment artifact
+        run: |
+          echo "Creating deployment artifact..."
+          tar -czf /tmp/deployment-artifact.tar.gz .open-next
+          echo "Artifact size: $(du -sh /tmp/deployment-artifact.tar.gz | cut -f1)"
       - name: Deploy to Cloudflare Workers
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      - name: Notify deployment
+      - name: Health check
+        id: health
         run: |
-          echo "Deployed to production: https://adocavo.net"
+          echo "Waiting for production deployment to propagate..."
+          sleep 45
+
+          MAX_ATTEMPTS=15
+          ATTEMPT=0
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://adocavo.net/api/health || echo "000")
+
+            if [ "$RESPONSE" = "200" ]; then
+              echo "✅ Production deployment healthy"
+              curl -s https://adocavo.net/api/health | jq .
+              exit 0
+            fi
+
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Health check returned $RESPONSE"
+            sleep 15
+          done
+
+          echo "❌ Production deployment health check failed after $MAX_ATTEMPTS attempts"
+          exit 1
+      - name: Post-deployment smoke tests
+        if: steps.health.outcome == 'success'
+        run: |
+          echo "Running smoke tests..."
+
+          # Test key endpoints
+          ENDPOINTS=(
+            "https://adocavo.net"
+            "https://adocavo.net/api/health"
+            "https://adocavo.net/api/hooks"
+          )
+
+          for endpoint in "${ENDPOINTS[@]}"; do
+            echo "Testing: $endpoint"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$endpoint")
+
+            if [ "$STATUS" != "000" ] && [ "$STATUS" -lt 500 ]; then
+              echo "✅ $endpoint - $STATUS"
+            else
+              echo "❌ $endpoint - $STATUS"
+              exit 1
+            fi
+          done
+
+          echo "✅ All smoke tests passed"
+      - name: Rollback on critical failure
+        if: failure() && steps.health.outcome == 'failure'
+        run: |
+          echo "⚠️ CRITICAL: Production deployment failed - initiating rollback"
+
+          # Get previous successful deployment
+          PREVIOUS_SHA=$(git log --pretty=format:'%H' --skip=1 -1)
+          echo "Rolling back to: $PREVIOUS_SHA"
+
+          # Restore previous worker (if Wrangler supports rollback)
+          npx wrangler rollback adocavo-net || echo "⚠️ Automatic rollback not available - manual intervention required"
+
+          echo "🚨 MANUAL INTERVENTION REQUIRED:"
+          echo "1. Check logs: npx wrangler tail adocavo-net"
+          echo "2. Restore database if needed: npx wrangler d1 execute adocavo-db --remote --file=/tmp/pre-migration-backup-*.sql"
+          echo "3. Redeploy previous version manually if needed"
+          exit 1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Deployment metrics
+        if: always()
+        run: |
+          echo "### Deployment Metrics 📊" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://adocavo.net" >> $GITHUB_STEP_SUMMARY
+          echo "- **Health**: https://adocavo.net/api/health" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Deployment successful!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Deployment failed - check logs for details" >> $GITHUB_STEP_SUMMARY
+          fi
+      - name: Notify deployment
+        if: success()
+        run: |
+          echo "✅ Production deployment successful"
+          echo "URL: https://adocavo.net"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"

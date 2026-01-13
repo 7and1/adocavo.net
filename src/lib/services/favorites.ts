@@ -2,6 +2,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { createDb, type Database } from "../db";
 import { scriptFavorites, generatedScripts, hooks } from "../schema";
 import { nanoid } from "nanoid";
+import { getCache, CacheKeys, CacheTags, CacheTTL, withCache } from "../cache";
 
 export interface FavoriteInput {
   userId: string;
@@ -41,6 +42,15 @@ export class FavoriteService {
       generatedScriptId,
     });
 
+    // Invalidate user favorites cache
+    const cache = getCache();
+    if (cache) {
+      await cache.invalidateByTags([
+        CacheTags.favorites,
+        CacheTags.user(userId),
+      ]);
+    }
+
     return { id };
   }
 
@@ -56,6 +66,15 @@ export class FavoriteService {
           eq(scriptFavorites.generatedScriptId, generatedScriptId),
         ),
       );
+
+    // Invalidate user favorites cache
+    const cache = getCache();
+    if (cache) {
+      await cache.invalidateByTags([
+        CacheTags.favorites,
+        CacheTags.user(userId),
+      ]);
+    }
 
     return true;
   }
@@ -78,33 +97,41 @@ export class FavoriteService {
     userId: string,
     limit = 20,
   ): Promise<FavoriteWithDetails[]> {
-    const result = await this.db
-      .select({
-        favoriteId: scriptFavorites.id,
-        generatedScriptId: scriptFavorites.generatedScriptId,
-        hookText: hooks.text,
-        productDescription: generatedScripts.productDescription,
-        scripts: generatedScripts.scripts,
-        createdAt: scriptFavorites.createdAt,
-      })
-      .from(scriptFavorites)
-      .innerJoin(
-        generatedScripts,
-        eq(scriptFavorites.generatedScriptId, generatedScripts.id),
-      )
-      .innerJoin(hooks, eq(generatedScripts.hookId, hooks.id))
-      .where(eq(scriptFavorites.userId, userId))
-      .orderBy(desc(scriptFavorites.createdAt))
-      .limit(limit);
+    const cacheKey = CacheKeys.userFavorites(userId, 1);
 
-    return result.map((row) => ({
-      id: row.favoriteId,
-      generatedScriptId: row.generatedScriptId,
-      hookText: row.hookText,
-      productDescription: row.productDescription,
-      scripts: row.scripts as Array<{ angle: string; script: string }>,
-      createdAt: row.createdAt,
-    }));
+    return withCache(
+      cacheKey,
+      async () => {
+        const result = await this.db
+          .select({
+            favoriteId: scriptFavorites.id,
+            generatedScriptId: scriptFavorites.generatedScriptId,
+            hookText: hooks.text,
+            productDescription: generatedScripts.productDescription,
+            scripts: generatedScripts.scripts,
+            createdAt: scriptFavorites.createdAt,
+          })
+          .from(scriptFavorites)
+          .innerJoin(
+            generatedScripts,
+            eq(scriptFavorites.generatedScriptId, generatedScripts.id),
+          )
+          .innerJoin(hooks, eq(generatedScripts.hookId, hooks.id))
+          .where(eq(scriptFavorites.userId, userId))
+          .orderBy(desc(scriptFavorites.createdAt))
+          .limit(limit);
+
+        return result.map((row) => ({
+          id: row.favoriteId,
+          generatedScriptId: row.generatedScriptId,
+          hookText: row.hookText,
+          productDescription: row.productDescription,
+          scripts: row.scripts as Array<{ angle: string; script: string }>,
+          createdAt: row.createdAt,
+        }));
+      },
+      CacheTTL.MEDIUM,
+    );
   }
 
   async getFavoriteCount(userId: string): Promise<number> {

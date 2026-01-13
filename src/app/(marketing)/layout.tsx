@@ -19,12 +19,25 @@ export default function MarketingLayout({
               <h3 className="font-semibold text-gray-900 mb-3">Product</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <Link href="/" className="hover:text-gray-900">
+                  <Link href="/" prefetch className="hover:text-gray-900">
                     Hook Library
                   </Link>
                 </li>
                 <li>
-                  <Link href="/pricing" className="hover:text-gray-900">
+                  <Link
+                    href="/examples"
+                    prefetch
+                    className="hover:text-gray-900"
+                  >
+                    Examples
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/pricing"
+                    prefetch
+                    className="hover:text-gray-900"
+                  >
                     Pricing
                   </Link>
                 </li>
@@ -34,17 +47,17 @@ export default function MarketingLayout({
               <h3 className="font-semibold text-gray-900 mb-3">Resources</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <Link href="/blog" className="hover:text-gray-900">
+                  <Link href="/blog" prefetch className="hover:text-gray-900">
                     Blog
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog" className="hover:text-gray-900">
+                  <Link href="/blog" prefetch className="hover:text-gray-900">
                     TikTok Ad Scripts
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog" className="hover:text-gray-900">
+                  <Link href="/blog" prefetch className="hover:text-gray-900">
                     Viral Hooks Guide
                   </Link>
                 </li>
@@ -54,7 +67,7 @@ export default function MarketingLayout({
               <h3 className="font-semibold text-gray-900 mb-3">Company</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <Link href="/about" className="hover:text-gray-900">
+                  <Link href="/about" prefetch className="hover:text-gray-900">
                     About
                   </Link>
                 </li>
@@ -64,12 +77,16 @@ export default function MarketingLayout({
               <h3 className="font-semibold text-gray-900 mb-3">Legal</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <Link href="/privacy" className="hover:text-gray-900">
+                  <Link
+                    href="/privacy"
+                    prefetch
+                    className="hover:text-gray-900"
+                  >
                     Privacy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="hover:text-gray-900">
+                  <Link href="/terms" prefetch className="hover:text-gray-900">
                     Terms
                   </Link>
                 </li>

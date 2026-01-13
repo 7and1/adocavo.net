@@ -15,7 +15,7 @@ import { auth } from "@/lib/auth";
 import { generateRequestSchema } from "@/lib/validations";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
-import { checkRateLimit, type RateLimitIdentifier } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
 import { generateScripts } from "@/lib/services/generation";
 import { NextResponse } from "next/server";
 
@@ -54,12 +54,8 @@ export const POST = withErrorHandler(async (request: Request) => {
 
   const db = createDb(env.DB as D1Database);
 
-  // Use user-based rate limiting for authenticated users to prevent proxy bypass
-  const rateLimitId: RateLimitIdentifier = {
-    type: "user",
-    value: session.user.id,
-  };
-  const rate = await checkRateLimit(db, rateLimitId, "generate");
+  const { identifier, tier } = await getRateLimitContext(request, session);
+  const rate = await checkRateLimit(db, identifier, "generate", tier);
 
   if (!rate.allowed) {
     throw new RateLimitError(rate.retryAfter);
@@ -69,6 +65,8 @@ export const POST = withErrorHandler(async (request: Request) => {
     userId: session.user.id,
     hookId: parsed.hookId,
     productDescription: parsed.productDescription,
+    remixTone: parsed.remixTone,
+    remixInstruction: parsed.remixInstruction,
   });
 
   if (!result.success) {

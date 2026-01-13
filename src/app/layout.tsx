@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/Providers";
+import { Analytics } from "@/components/Analytics";
+import { getOrganizationJsonLd } from "@/lib/enhanced-seo";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -34,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "Adocavo",
     images: [
       {
-        url: "https://adocavo.net/og-default.svg",
+        url: "https://adocavo.net/opengraph-image",
         width: 1200,
         height: 630,
         alt: "Adocavo - TikTok Ad Script Generator",
@@ -48,7 +51,7 @@ export const metadata: Metadata = {
     title: "TikTok Hooks & Ad Script Generator | Adocavo",
     description:
       "Generate high-converting TikTok ad scripts with AI. Browse 50+ proven viral hooks.",
-    images: ["https://adocavo.net/og-default.svg"],
+    images: ["https://adocavo.net/opengraph-image"],
   },
   robots: {
     index: true,
@@ -62,23 +65,45 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "google-site-verification-token",
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "",
   },
 };
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  preload: true,
+});
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+  preload: true,
+});
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const organizationJsonLd = getOrganizationJsonLd();
+
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${jetbrains.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="canonical" href="https://adocavo.net" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
       </head>
       <body className="min-h-screen bg-white font-sans antialiased">
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );

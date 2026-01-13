@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET } from "@/app/api/hooks/route";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
 import { getHooks } from "@/lib/services/hooks";
 
 vi.mock("@/lib/cloudflare", () => ({
@@ -15,7 +15,7 @@ vi.mock("@/lib/db", () => ({
 
 vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: vi.fn(),
-  getClientIp: vi.fn(),
+  getRateLimitContext: vi.fn(),
 }));
 
 vi.mock("@/lib/services/hooks", () => ({
@@ -57,7 +57,10 @@ describe("API: GET /api/hooks", () => {
     vi.mocked(getBindings).mockReturnValue(mockEnv as any);
     vi.mocked(createDb).mockReturnValue(mockDb as any);
     vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true });
-    vi.mocked(getClientIp).mockReturnValue("127.0.0.1");
+    vi.mocked(getRateLimitContext).mockResolvedValue({
+      identifier: { type: "device", value: "fingerprint" },
+      tier: "anon",
+    });
     vi.mocked(getHooks).mockResolvedValue(mockHooks);
   });
 
@@ -177,7 +180,12 @@ describe("API: GET /api/hooks", () => {
 
       await GET(request);
 
-      expect(checkRateLimit).toHaveBeenCalledWith(mockDb, "127.0.0.1", "hooks");
+      expect(checkRateLimit).toHaveBeenCalledWith(
+        mockDb,
+        { type: "device", value: "fingerprint" },
+        "hooks",
+        "anon",
+      );
     });
   });
 

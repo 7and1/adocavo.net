@@ -131,7 +131,9 @@ describe("API: GET /api/health", () => {
       } as never);
 
       const mockDbStatement = {
-        all: vi.fn().mockRejectedValue(new Error("Connection lost")),
+        all: vi.fn().mockImplementation(async () => {
+          throw new Error("Connection lost");
+        }),
         run: vi.fn().mockResolvedValue({}),
       };
       vi.mocked(mockEnv.DB.prepare).mockReturnValue(mockDbStatement as never);
@@ -220,7 +222,9 @@ describe("API: GET /api/health", () => {
         run: vi.fn().mockResolvedValue({}),
       };
       vi.mocked(mockEnv.DB.prepare).mockReturnValue(mockDbStatement as never);
-      vi.mocked(mockEnv.AI.run).mockRejectedValue(new Error("AI unavailable"));
+      vi.mocked(mockEnv.AI.run).mockImplementation(async () => {
+        throw new Error("AI unavailable");
+      });
 
       const response = await GET();
       const body = await response.json();
@@ -257,9 +261,9 @@ describe("API: GET /api/health", () => {
 
   describe("context errors", () => {
     it("should handle missing Cloudflare context", async () => {
-      vi.mocked(getCloudflareContext).mockRejectedValue(
-        new Error("Cloudflare context not available"),
-      );
+      vi.mocked(getCloudflareContext).mockImplementation(async () => {
+        throw new Error("Cloudflare context not available");
+      });
 
       const response = await GET();
       const body = await response.json();
@@ -302,7 +306,9 @@ describe("API: GET /api/health", () => {
       } as never);
 
       const mockDbStatement = {
-        all: vi.fn().mockRejectedValue(new Error("DB error")),
+        all: vi.fn().mockImplementation(async () => {
+          throw new Error("DB error");
+        }),
         run: vi.fn().mockResolvedValue({}),
       };
       vi.mocked(mockEnv.DB.prepare).mockReturnValue(mockDbStatement as never);
@@ -327,7 +333,9 @@ describe("API: GET /api/health", () => {
         run: vi.fn().mockResolvedValue({}),
       };
       vi.mocked(mockEnv.DB.prepare).mockReturnValue(mockDbStatement as never);
-      vi.mocked(mockEnv.AI.run).mockRejectedValue(new Error("AI error"));
+      vi.mocked(mockEnv.AI.run).mockImplementation(async () => {
+        throw new Error("AI error");
+      });
 
       const response = await GET();
       const body = await response.json();

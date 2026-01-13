@@ -15,6 +15,9 @@ vi.mock("@/lib/db", () => ({
 
 vi.mock("@/lib/cloudflare", () => ({
   getCloudflareContext: vi.fn(),
+  getBindings: vi.fn(() => ({})),
+  getD1: vi.fn(() => ({})),
+  getKV: vi.fn(() => null),
 }));
 
 describe("Hooks Service", () => {

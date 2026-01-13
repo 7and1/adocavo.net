@@ -20,7 +20,10 @@ export const users = sqliteTable(
     email: text("email").notNull().unique(),
     emailVerified: integer("emailVerified", { mode: "timestamp" }),
     image: text("image"),
-    role: text("role").default("user").notNull(),
+    role: text("role")
+      .$type<"user" | "pro" | "admin">()
+      .default("user")
+      .notNull(),
     credits: integer("credits").default(10).notNull(),
     createdAt: integer("created_at", { mode: "timestamp" })
       .defaultNow()
@@ -103,11 +106,44 @@ export const hooks = sqliteTable(
       .notNull(),
   },
   (table) => ({
-    categoryScoreIdx: index("hooks_category_score_idx").on(
+    categoryScoreIdx: index("hooks_category_active_score_idx").on(
       table.category,
+      table.isActive,
       table.engagementScore,
     ),
-    activeIdx: index("hooks_active_idx").on(table.isActive),
+  }),
+);
+
+export const hookReviewQueue = sqliteTable(
+  "hook_review_queue",
+  {
+    id: text("id").primaryKey(),
+    text: text("text").notNull(),
+    category: text("category").notNull(),
+    engagementScore: integer("engagement_score").notNull(),
+    source: text("source"),
+    status: text("status")
+      .$type<"pending" | "approved" | "rejected">()
+      .notNull()
+      .default("pending"),
+    reviewerId: text("reviewer_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    reviewedAt: integer("reviewed_at", { mode: "timestamp" }),
+    notes: text("notes"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    statusCreatedIdx: index("hook_review_status_created_idx").on(
+      table.status,
+      table.createdAt,
+    ),
+    categoryIdx: index("hook_review_category_idx").on(table.category),
   }),
 );
 
@@ -122,6 +158,8 @@ export const generatedScripts = sqliteTable(
       .notNull()
       .references(() => hooks.id),
     productDescription: text("product_description").notNull(),
+    remixTone: text("remix_tone"),
+    remixInstruction: text("remix_instruction"),
     scripts: text("scripts", { mode: "json" }).notNull(),
     createdAt: integer("created_at", { mode: "timestamp" })
       .defaultNow()
@@ -129,7 +167,45 @@ export const generatedScripts = sqliteTable(
   },
   (table) => ({
     userIdx: index("generated_scripts_user_idx").on(table.userId),
+    userCreatedIdx: index("generated_scripts_user_created_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
     hookIdx: index("generated_scripts_hook_idx").on(table.hookId),
+    hookCreatedIdx: index("generated_scripts_hook_created_idx").on(
+      table.hookId,
+      table.createdAt,
+    ),
+  }),
+);
+
+export const competitorAnalyses = sqliteTable(
+  "competitor_analyses",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tiktokUrl: text("tiktok_url").notNull(),
+    title: text("title"),
+    author: text("author"),
+    transcript: text("transcript").notNull(),
+    transcriptSource: text("transcript_source").notNull(),
+    hook: text("hook"),
+    structure: text("structure", { mode: "json" }),
+    template: text("template", { mode: "json" }),
+    cta: text("cta"),
+    notes: text("notes", { mode: "json" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    userIdx: index("competitor_analyses_user_idx").on(table.userId),
+    userCreatedIdx: index("competitor_analyses_user_created_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
   }),
 );
 
@@ -151,6 +227,7 @@ export const waitlist = sqliteTable(
   }),
 );
 
+/** @deprecated Feature removed */
 export const fakeDoorClicks = sqliteTable(
   "fake_door_clicks",
   {
@@ -205,6 +282,11 @@ export const scriptRatings = sqliteTable(
   },
   (table) => ({
     scriptIdx: index("script_ratings_script_idx").on(table.generatedScriptId),
+    scriptRatingIdx: index("script_ratings_script_rating_idx").on(
+      table.generatedScriptId,
+      table.rating,
+    ),
+    ratingIdx: index("script_ratings_rating_idx").on(table.rating),
     userIdx: index("script_ratings_user_idx").on(table.userId),
     uniqueUserScript: unique("script_ratings_user_script_idx").on(
       table.generatedScriptId,
@@ -229,10 +311,15 @@ export const scriptFavorites = sqliteTable(
   },
   (table) => ({
     userIdx: index("script_favorites_user_idx").on(table.userId),
+    userCreatedIdx: index("script_favorites_user_created_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
     scriptIdx: index("script_favorites_script_idx").on(table.generatedScriptId),
-    uniqueUserScript: primaryKey({
-      columns: [table.userId, table.generatedScriptId],
-    }),
+    uniqueUserScript: unique("script_favorites_user_script_unique").on(
+      table.userId,
+      table.generatedScriptId,
+    ),
   }),
 );
 
@@ -240,11 +327,22 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
   generatedScripts: many(generatedScripts),
+  competitorAnalyses: many(competitorAnalyses),
 }));
 
 export const hooksRelations = relations(hooks, ({ many }) => ({
   generatedScripts: many(generatedScripts),
 }));
+
+export const hookReviewQueueRelations = relations(
+  hookReviewQueue,
+  ({ one }) => ({
+    reviewer: one(users, {
+      fields: [hookReviewQueue.reviewerId],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const generatedScriptsRelations = relations(
   generatedScripts,
@@ -262,7 +360,9 @@ export const generatedScriptsRelations = relations(
 
 export type User = InferSelectModel<typeof users>;
 export type Hook = InferSelectModel<typeof hooks>;
+export type HookReviewQueueItem = InferSelectModel<typeof hookReviewQueue>;
 export type GeneratedScript = InferSelectModel<typeof generatedScripts>;
+export type CompetitorAnalysis = InferSelectModel<typeof competitorAnalyses>;
 export type WaitlistEntry = InferSelectModel<typeof waitlist>;
 export type NewHook = InferInsertModel<typeof hooks>;
 export type ScriptRating = InferSelectModel<typeof scriptRatings>;

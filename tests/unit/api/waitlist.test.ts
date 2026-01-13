@@ -3,7 +3,7 @@ import { POST } from "@/app/api/waitlist/route";
 import { auth } from "@/lib/auth";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
 import { waitlist as waitlistTable } from "@/lib/schema";
 
 vi.mock("@/lib/auth", () => ({
@@ -20,7 +20,7 @@ vi.mock("@/lib/db", () => ({
 
 vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: vi.fn(),
-  getClientIp: vi.fn(),
+  getRateLimitContext: vi.fn(),
 }));
 
 describe("API: POST /api/waitlist", () => {
@@ -45,7 +45,10 @@ describe("API: POST /api/waitlist", () => {
     vi.mocked(getBindings).mockReturnValue(mockEnv as any);
     vi.mocked(createDb).mockReturnValue(mockDb as any);
     vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true });
-    vi.mocked(getClientIp).mockReturnValue("127.0.0.1");
+    vi.mocked(getRateLimitContext).mockResolvedValue({
+      identifier: { type: "ip", value: "127.0.0.1" },
+      tier: "anon",
+    });
     mockDb.insert.mockReturnValue({
       values: vi.fn().mockReturnValue({
         onConflictDoUpdate: vi.fn().mockReturnValue({
@@ -252,8 +255,9 @@ describe("API: POST /api/waitlist", () => {
 
       expect(checkRateLimit).toHaveBeenCalledWith(
         mockDb,
-        "127.0.0.1",
+        { type: "ip", value: "127.0.0.1" },
         "waitlist",
+        "anon",
       );
     });
   });

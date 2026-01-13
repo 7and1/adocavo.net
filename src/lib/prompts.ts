@@ -57,43 +57,170 @@ Return ONLY valid JSON with this exact structure:
 /**
  * Sanitizes user input to prevent AI prompt injection attacks.
  * Removes common injection patterns and limits length.
+ *
+ * Security features:
+ * - Blocks instruction override attempts
+ * - Prevents Unicode homograph attacks
+ * - Removes delimiter injection attempts
+ * - Limits length to prevent token flooding
+ * - Validates against dangerous patterns
  */
-function sanitizePromptInput(input: string, maxLength = 500): string {
-  // Remove potentially dangerous patterns
-  let sanitized = input
+export function sanitizePromptInput(input: string, maxLength = 500): string {
+  if (!input || typeof input !== "string") {
+    return "";
+  }
+
+  // Step 1: Remove Unicode homograph attacks (spoofed characters)
+  // Normalize to NFKC form to decompose combined characters
+  let sanitized = input.normalize("NFKC");
+
+  // Step 2: Remove potentially dangerous patterns
+  sanitized = sanitized
     // Remove instructions to ignore previous context
-    .replace(/ignore\s+(all\s+)?(previous|above)/gi, "")
+    .replace(/ignore\s+(all\s+)?(previous|above|the\s+system)/gi, "")
     // Remove instructions to change system behavior
     .replace(
-      /(forget|disregard|override)\s+(everything|all|instructions)/gi,
+      /(forget|disregard|override|bypass|ignore)\s+(everything|all\s+instructions|rules|constraints|security|filters)/gi,
       "",
     )
     // Remove attempts to switch roles or modes
-    .replace(/(act|pretend|behave|roleplay)\s+(as|like|a)/gi, "")
+    .replace(
+      /(act|pretend|behave|roleplay|simulate|become|you\s+are\s+now|role:\s*|mode:\s*)/gi,
+      "",
+    )
     // Remove delimiter attempts that could break prompt structure
     .replace(/---+/g, "")
     .replace(/===+/g, "")
     .replace(/\[END\]/gi, "")
+    .replace(/<<\s*END\s*>>/gi, "")
     // Remove JSON injection attempts
     .replace(/\{[\s"]*scripts[\s"]*:/gi, "")
-    // Remove control characters
+    .replace(/\]\s*\}\s*$/gi, "")
+    // Remove markdown code block injections
+    .replace(/```\s*(json)?/gi, "")
+    // Remove XML-style tag injections
+    .replace(/<\/?(?:system|assistant|user|prompt|instruction)>/gi, "")
+    // Remove control characters (except newline and tab)
     .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, "")
+    // Remove zero-width characters (invisible spoofing)
+    .replace(/[\u200B-\u200D\uFEFF\uFFF9-\uFFFB]/g, "")
     // Normalize whitespace
     .replace(/\s+/g, " ")
     .trim();
 
-  // Enforce length limit
+  // Step 3: Enforce length limit
   if (sanitized.length > maxLength) {
     sanitized = sanitized.substring(0, maxLength);
+  }
+
+  // Step 4: Validate no dangerous patterns remain
+  const dangerousPatterns = [
+    /<script[^>]*>/i,
+    /javascript:/i,
+    /on\w+\s*=/i, // Event handlers like onclick=
+    /data:\s*text\/html/i,
+    /\beval\b/i,
+  ];
+
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(sanitized)) {
+      // If dangerous pattern found, return empty string
+      console.warn("Dangerous pattern detected in input, sanitizing to empty");
+      return "";
+    }
   }
 
   return sanitized;
 }
 
-export function buildUserPrompt(hook: string, product: string): string {
+/**
+ * Validates AI-generated script output for safety and quality.
+ * This provides defense-in-depth against malicious model outputs.
+ */
+export function validateScriptOutput(scripts: unknown): {
+  valid: boolean;
+  error?: string;
+} {
+  if (!scripts || typeof scripts !== "object") {
+    return { valid: false, error: "Invalid output structure" };
+  }
+
+  const scriptsObj = scripts as Record<string, unknown>;
+
+  // Check if it's a scripts array
+  if (!("scripts" in scriptsObj) || !Array.isArray(scriptsObj.scripts)) {
+    return { valid: false, error: "Missing scripts array" };
+  }
+
+  const scriptsArray = scriptsObj.scripts;
+
+  // Validate script count
+  if (scriptsArray.length < 1 || scriptsArray.length > 10) {
+    return { valid: false, error: "Invalid number of scripts" };
+  }
+
+  // Validate each script
+  for (const script of scriptsArray) {
+    if (typeof script !== "object" || script === null) {
+      return { valid: false, error: "Invalid script structure" };
+    }
+
+    const s = script as Record<string, unknown>;
+
+    // Check required fields
+    if (!("angle" in s) || !("script" in s)) {
+      return { valid: false, error: "Missing required fields" };
+    }
+
+    // Validate field types
+    if (typeof s.angle !== "string" || typeof s.script !== "string") {
+      return { valid: false, error: "Invalid field types" };
+    }
+
+    // Validate script length (prevent token flooding)
+    if (s.script.length > 5000) {
+      return { valid: false, error: "Script too long" };
+    }
+
+    // Check for dangerous content in script
+    const dangerousContent = [
+      /<script[^>]*>.*?<\/script>/gis,
+      /javascript:/gi,
+      /data:\s*text\/html/gi,
+      /\beval\s*\(/gi,
+    ];
+
+    for (const pattern of dangerousContent) {
+      if (pattern.test(s.script as string)) {
+        return { valid: false, error: "Dangerous content detected" };
+      }
+    }
+  }
+
+  return { valid: true };
+}
+
+export function buildUserPrompt(
+  hook: string,
+  product: string,
+  remixInstruction?: string,
+  remixTone?: string,
+): string {
   // Sanitize both inputs before using them
   const sanitizedHook = sanitizePromptInput(hook, 200);
   const sanitizedProduct = sanitizePromptInput(product, 500);
+  const sanitizedInstruction = remixInstruction
+    ? sanitizePromptInput(remixInstruction, 200)
+    : "";
+  const sanitizedTone = remixTone ? sanitizePromptInput(remixTone, 40) : "";
+
+  const remixGuidance: string[] = [];
+  if (sanitizedTone && sanitizedTone !== "default") {
+    remixGuidance.push(`Tone: ${sanitizedTone}`);
+  }
+  if (sanitizedInstruction) {
+    remixGuidance.push(`Style notes: ${sanitizedInstruction}`);
+  }
 
   const examples = FEW_SHOT_EXAMPLES.slice(0, 2)
     .map(
@@ -111,11 +238,17 @@ ${JSON.stringify(
     )
     .join("\n");
 
+  const remixBlock =
+    remixGuidance.length > 0
+      ? `\nRemix guidance:\n- ${remixGuidance.join("\n- ")}\n`
+      : "";
+
   return `${examples}
 
 NOW GENERATE FOR:
 Hook: "${sanitizedHook}"
 Product: ${sanitizedProduct}
+${remixBlock}
 
 Remember:
 - Hook MUST be the first spoken line
@@ -131,7 +264,7 @@ const MODEL_MAP = {
   "70b": "@cf/meta/llama-3.1-70b-instruct",
 };
 
-const modelSize = (process.env.AI_MODEL_SIZE || "8b").toLowerCase();
+const modelSize = (process.env.AI_MODEL_SIZE || "70b").toLowerCase();
 
 export const AI_CONFIG = {
   model: MODEL_MAP[modelSize as keyof typeof MODEL_MAP] ?? MODEL_MAP["8b"],

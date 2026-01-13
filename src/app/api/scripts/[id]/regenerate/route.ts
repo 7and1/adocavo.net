@@ -109,6 +109,8 @@ export const POST = withErrorHandler(
             content: buildUserPrompt(
               hook.text,
               existingScript.productDescription,
+              existingScript.remixInstruction ?? undefined,
+              existingScript.remixTone ?? undefined,
             ),
           },
         ],

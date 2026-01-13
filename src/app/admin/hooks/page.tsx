@@ -1,44 +1,61 @@
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
-import { hooks } from "@/lib/schema";
+import { hookReviewQueue, hooks } from "@/lib/schema";
 import { desc } from "drizzle-orm";
+import { AdminHooksManager } from "@/components/admin/AdminHooksManager";
+import { HOOK_CATEGORIES } from "@/lib/validations";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminHooksPage() {
   const env = getBindings();
   const db = env.DB ? createDb(env.DB as D1Database) : null;
-  const recentHooks = db
-    ? await db.query.hooks.findMany({
-        orderBy: [desc(hooks.createdAt)],
-        limit: 10,
-      })
-    : [];
+  const [recentHooks, reviewQueue] = db
+    ? await Promise.all([
+        db.query.hooks.findMany({
+          orderBy: [desc(hooks.createdAt)],
+          limit: 200,
+        }),
+        db.query.hookReviewQueue.findMany({
+          orderBy: [desc(hookReviewQueue.createdAt)],
+          limit: 200,
+        }),
+      ])
+    : [[], []];
+
+  const hooksData = recentHooks.map((hook) => ({
+    ...hook,
+    createdAt: hook.createdAt?.toISOString?.() ?? null,
+    updatedAt: hook.updatedAt?.toISOString?.() ?? null,
+  }));
+
+  const reviewData = reviewQueue.map((item) => ({
+    ...item,
+    status: item.status as "pending" | "approved" | "rejected",
+    createdAt: item.createdAt?.toISOString?.() ?? null,
+    updatedAt: item.updatedAt?.toISOString?.() ?? null,
+    reviewedAt: item.reviewedAt?.toISOString?.() ?? null,
+  }));
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Hook Review Queue</h1>
-        <p className="text-gray-600">Latest hooks added to the library.</p>
+        <p className="text-gray-600">
+          Manage the hook library, approve new submissions, and track review
+          status.
+        </p>
       </div>
 
-      {recentHooks.length === 0 ? (
-        <div className="rounded-2xl border bg-white p-6 text-gray-500">
-          No hooks found. Use the seed script to add initial hooks.
-        </div>
+      {db ? (
+        <AdminHooksManager
+          initialHooks={hooksData}
+          initialReviewQueue={reviewData}
+          categories={[...HOOK_CATEGORIES]}
+        />
       ) : (
-        <div className="grid gap-4">
-          {recentHooks.map((hook) => (
-            <div key={hook.id} className="rounded-xl border bg-white p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold">&quot;{hook.text}&quot;</p>
-                  <p className="text-sm text-gray-500">
-                    {hook.category} · {hook.engagementScore}
-                  </p>
-                </div>
-                <span className="text-xs text-gray-400">{hook.id}</span>
-              </div>
-            </div>
-          ))}
+        <div className="rounded-2xl border bg-white p-6 text-gray-500">
+          No database binding detected. Configure D1 to manage hooks.
         </div>
       )}
     </div>

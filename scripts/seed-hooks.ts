@@ -36,8 +36,11 @@ console.log(`Seed SQL written to ${outPath}`);
 
 if (process.env.SEED_EXECUTE === "true") {
   const dbName = process.env.SEED_DB_NAME || "adocavo-db";
-  console.log(`Executing seed against ${dbName}...`);
-  execSync(`wrangler d1 execute ${dbName} --file=${outPath}`, {
+  const remote = process.env.SEED_REMOTE === "true" ? "--remote" : "";
+  console.log(
+    `Executing seed against ${dbName}${remote ? " (remote)" : " (local)"}...`,
+  );
+  execSync(`wrangler d1 execute ${dbName} ${remote} --file=${outPath}`, {
     stdio: "inherit",
   });
 } else {

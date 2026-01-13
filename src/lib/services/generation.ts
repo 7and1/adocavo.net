@@ -1,8 +1,17 @@
-import { AI_CONFIG, SYSTEM_PROMPT, buildUserPrompt } from "../prompts";
+import {
+  AI_CONFIG,
+  SYSTEM_PROMPT,
+  buildUserPrompt,
+  validateScriptOutput,
+} from "../prompts";
+import { withAiProtection } from "../timeout";
 import { createDb, type Database } from "../db";
 import { users, generatedScripts, hooks } from "../schema";
 import { eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { logError } from "../logger";
+import { withDbQuery, withTransaction } from "../db-utils";
+import { dbGeneratedScriptSchema } from "../validations";
 
 export interface Script {
   angle: "Pain Point" | "Benefit" | "Social Proof";
@@ -72,6 +81,8 @@ export interface GenerationInput {
   userId: string;
   hookId: string;
   productDescription: string;
+  remixTone?: string;
+  remixInstruction?: string;
 }
 
 export interface GenerationSuccess {
@@ -103,7 +114,8 @@ export class GenerationService {
   ) {}
 
   async generate(input: GenerationInput): Promise<GenerationResult> {
-    const { userId, hookId, productDescription } = input;
+    const { userId, hookId, productDescription, remixTone, remixInstruction } =
+      input;
 
     const creditResult = await this.deductCredit(userId);
     if (!creditResult.success) {
@@ -114,9 +126,11 @@ export class GenerationService {
     let generationId: string;
 
     try {
-      const hook = await this.db.query.hooks.findFirst({
-        where: eq(hooks.id, hookId),
-      });
+      const hook = await withDbQuery("fetch_hook", () =>
+        this.db.query.hooks.findFirst({
+          where: eq(hooks.id, hookId),
+        }),
+      );
 
       if (!hook || !hook.isActive) {
         await this.refundCredit(userId);
@@ -127,7 +141,12 @@ export class GenerationService {
         };
       }
 
-      const aiResult = await this.callAI(hook.text, productDescription);
+      const aiResult = await this.callAI(
+        hook.text,
+        productDescription,
+        remixInstruction,
+        remixTone,
+      );
       if (!aiResult.success) {
         await this.refundCredit(userId);
         return aiResult;
@@ -136,18 +155,46 @@ export class GenerationService {
       finalScripts = aiResult.scripts;
       generationId = nanoid();
 
-      await this.db.transaction(async (tx) => {
+      const scriptData = {
+        id: generationId,
+        userId,
+        hookId,
+        productDescription,
+        remixTone: remixTone || null,
+        remixInstruction: remixInstruction || null,
+        scripts: finalScripts,
+        createdAt: new Date(),
+      };
+
+      const validationResult = dbGeneratedScriptSchema.safeParse(scriptData);
+      if (!validationResult.success) {
+        await this.refundCredit(userId);
+        logError(
+          "Script data validation failed",
+          new Error(validationResult.error.message),
+          { userId, hookId },
+        );
+        return {
+          success: false,
+          error: "DATABASE_ERROR",
+          message: "Invalid script data",
+        };
+      }
+
+      await withTransaction(this.db, async (tx) => {
         await tx.insert(generatedScripts).values({
           id: generationId,
           userId,
           hookId,
           productDescription,
+          remixTone: remixTone || null,
+          remixInstruction: remixInstruction || null,
           scripts: JSON.stringify(finalScripts),
         });
       });
     } catch (error) {
       await this.refundCredit(userId);
-      console.error("Generation failed:", error);
+      logError("Generation failed", error, { userId, hookId });
       return {
         success: false,
         error: "DATABASE_ERROR",
@@ -199,19 +246,34 @@ export class GenerationService {
   private async callAI(
     hook: string,
     productDescription: string,
+    remixInstruction?: string,
+    remixTone?: string,
   ): Promise<
     | { success: true; scripts: Script[] }
     | { success: false; error: GenerationErrorCode; message: string }
   > {
     try {
-      const response = await this.ai.run(AI_CONFIG.model, {
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: buildUserPrompt(hook, productDescription) },
-        ],
-        temperature: AI_CONFIG.temperature,
-        max_tokens: AI_CONFIG.max_tokens,
-      });
+      // Wrap AI call with timeout and circuit breaker protection
+      const response = await withAiProtection(
+        async () =>
+          this.ai.run(AI_CONFIG.model, {
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              {
+                role: "user",
+                content: buildUserPrompt(
+                  hook,
+                  productDescription,
+                  remixInstruction,
+                  remixTone,
+                ),
+              },
+            ],
+            temperature: AI_CONFIG.temperature,
+            max_tokens: AI_CONFIG.max_tokens,
+          }),
+        30000, // 30 second timeout for AI calls
+      );
 
       const content = response.response || "";
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -225,6 +287,20 @@ export class GenerationService {
       }
 
       const parsed = JSON.parse(jsonMatch[0]) as { scripts?: Script[] };
+
+      // Double validation: both structure and content safety
+      const validation = validateScriptOutput(parsed);
+      if (!validation.valid) {
+        logError("AI output validation failed", new Error(validation.error), {
+          hook,
+          productDescription,
+        });
+        return {
+          success: false,
+          error: "INVALID_AI_RESPONSE",
+          message: validation.error || "Invalid AI output",
+        };
+      }
 
       if (!parsed.scripts || !Array.isArray(parsed.scripts)) {
         return {
@@ -244,7 +320,7 @@ export class GenerationService {
 
       return { success: true, scripts: parsed.scripts };
     } catch (error) {
-      console.error("AI error:", error);
+      logError("AI error", error, { hook, productDescription });
       return {
         success: false,
         error: "AI_UNAVAILABLE",

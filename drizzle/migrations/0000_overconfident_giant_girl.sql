@@ -67,11 +67,11 @@ CREATE TABLE `script_favorites` (
 	`user_id` text NOT NULL,
 	`generated_script_id` text NOT NULL,
 	`created_at` integer DEFAULT (cast((julianday('now') - 2440587.5)*86400000 as integer)) NOT NULL,
-	PRIMARY KEY(`user_id`, `generated_script_id`),
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`generated_script_id`) REFERENCES `generated_scripts`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `script_favorites_user_script_unique` ON `script_favorites` (`user_id`,`generated_script_id`);--> statement-breakpoint
 CREATE INDEX `script_favorites_user_idx` ON `script_favorites` (`user_id`);--> statement-breakpoint
 CREATE INDEX `script_favorites_script_idx` ON `script_favorites` (`generated_script_id`);--> statement-breakpoint
 CREATE TABLE `script_ratings` (

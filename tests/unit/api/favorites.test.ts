@@ -33,6 +33,10 @@ vi.mock("@/lib/api-utils", async () => {
 
 vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: vi.fn().mockResolvedValue({ allowed: true }),
+  getRateLimitContext: vi.fn().mockResolvedValue({
+    identifier: { type: "user", value: "user-1" },
+    tier: "free",
+  }),
 }));
 
 describe("API: /api/scripts/favorites", () => {

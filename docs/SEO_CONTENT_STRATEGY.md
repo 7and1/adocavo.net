@@ -80,6 +80,15 @@ adocavo.net/
 |   |   Primary: "beauty tiktok ad examples", "skincare ad scripts"
 |   |
 |   +-- /examples/[category]-tiktok-ads
+|   |
+|   +-- /examples/real-estate-tiktok-hooks
+|   |   Primary: "real estate tiktok hooks", "realtor ad scripts"
+|   |
+|   +-- /examples/dropshipping-video-ads
+|   |   Primary: "dropshipping video ads", "dropshipping tiktok hooks"
+|   |
+|   +-- /examples/saas-marketing-hooks
+|       Primary: "saas marketing hooks", "b2b tiktok ad scripts"
 |
 +-- /about
 +-- /pricing (Coming Soon page)

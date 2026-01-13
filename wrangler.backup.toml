@@ -1,0 +1,21 @@
+name = "adocavo-db-backup"
+main = "workers/backup/worker.ts"
+compatibility_date = "2026-01-09"
+compatibility_flags = ["nodejs_compat"]
+account_id = "873cd683fb162639ab3732a3a995b64b"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "adocavo-db"
+database_id = "d86749a1-0751-473b-9c9b-7b0fecd09538"
+
+[[r2_buckets]]
+binding = "R2_BACKUPS"
+bucket_name = "adocavo-backups"
+
+[vars]
+BACKUP_PREFIX = "d1-backups"
+BACKUP_RETENTION_DAYS = "30"
+
+[triggers]
+crons = ["0 3 * * *"]

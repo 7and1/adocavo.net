@@ -39,7 +39,7 @@ export interface SEOMetadata {
 
 export function generateMetadata(seo: SEOMetadata): Metadata {
   const baseUrl = "https://adocavo.net";
-  const defaultOgImage = `${baseUrl}/og-default.svg`;
+  const defaultOgImage = `${baseUrl}/opengraph-image`;
 
   return {
     title: {
@@ -218,6 +218,78 @@ export const pageMetadata = {
       "ugc script tool cost",
     ],
   },
+  privacy: {
+    title: "Privacy Policy | Adocavo",
+    description:
+      "Learn how Adocavo collects, uses, and protects your data when you use our TikTok ad script generator.",
+    keywords: ["adocavo privacy", "privacy policy", "data protection"],
+  },
+  terms: {
+    title: "Terms of Service | Adocavo",
+    description:
+      "Review the terms for using Adocavo's TikTok hook library and AI script generator.",
+    keywords: ["adocavo terms", "terms of service", "usage policy"],
+  },
+  examplesIndex: {
+    title: "TikTok Ad Examples by Category | Adocavo",
+    description:
+      "Explore TikTok ad examples by category and niche with proven hook patterns and script angles. Find the right style for your beauty, tech, fitness, food, finance, pet, or niche brand.",
+    keywords: [
+      "tiktok ad examples",
+      "tiktok ad script examples",
+      "ugc ad examples",
+      "viral tiktok hooks",
+      "tiktok ad ideas",
+      "tiktok marketing examples",
+    ],
+  },
+  examplesNiche: (
+    niche: {
+      title: string;
+      description: string;
+      slug: string;
+      keywords?: string[];
+    },
+    count = 0,
+  ) => {
+    const countLabel = count > 0 ? `${count}+` : "10+";
+    return {
+      title: niche.title,
+      description: niche.description,
+      keywords: niche.keywords || [
+        niche.slug.replace(/-/g, " "),
+        "tiktok hooks",
+        "tiktok ad scripts",
+        "ugc ad examples",
+      ],
+      openGraph: {
+        type: "website" as const,
+        title: niche.title,
+        description: `Browse ${countLabel} hook ideas and script angles for ${niche.title}.`,
+      },
+    };
+  },
+  examplesCategory: (category: string, count = 0) => {
+    const capitalized = capitalize(category);
+    const categoryVariations = getCategoryVariations(category);
+    const countLabel = count > 0 ? `${count}+` : "10+";
+    return {
+      title: `${capitalized} TikTok Ad Examples | ${countLabel} Hook Ideas`,
+      description: `Browse ${countLabel} ${capitalized.toLowerCase()} TikTok ad examples and hook patterns. Generate scripts for ${categoryVariations.products} in seconds.`,
+      keywords: [
+        `${category} tiktok ad examples`,
+        `${category} tiktok hooks`,
+        `${category} ad script examples`,
+        `${category} ugc ads`,
+        `${category} marketing ideas`,
+      ],
+      openGraph: {
+        type: "website" as const,
+        title: `${capitalized} TikTok Ad Examples`,
+        description: `Proven ${category} TikTok ad hooks and script ideas for ${categoryVariations.products}.`,
+      },
+    };
+  },
 };
 
 function capitalize(str: string): string {
@@ -285,12 +357,15 @@ export function getWebApplicationJsonLd() {
   };
 }
 
-export function getCreativeWorkJsonLd(hook: {
-  id: string;
-  text: string;
-  category: string;
-  engagementScore: number;
-}) {
+export function getCreativeWorkJsonLd(
+  hook: {
+    id: string;
+    text: string;
+    category: string;
+    engagementScore: number;
+  },
+  rating?: { averageRating: number; totalRatings: number },
+) {
   return {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
@@ -299,13 +374,13 @@ export function getCreativeWorkJsonLd(hook: {
     genre: hook.category,
     keywords: `${hook.category},tiktok hook,viral hook,ad script,ugc content`,
     aggregateRating:
-      hook.engagementScore > 0
+      rating && rating.totalRatings > 0
         ? {
             "@type": "AggregateRating",
-            ratingValue: hook.engagementScore,
-            bestRating: 100,
-            worstRating: 0,
-            ratingCount: 1,
+            ratingValue: rating.averageRating,
+            ratingCount: rating.totalRatings,
+            bestRating: 5,
+            worstRating: 1,
           }
         : undefined,
     author: {

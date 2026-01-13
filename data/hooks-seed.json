@@ -138,5 +138,285 @@
     "category": "food",
     "engagementScore": 80,
     "source": "manual_curation"
+  },
+  {
+    "id": "hook_021",
+    "text": "This $9 serum fixed my textured skin",
+    "category": "beauty",
+    "engagementScore": 94,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_022",
+    "text": "I stopped using foundation because of this",
+    "category": "beauty",
+    "engagementScore": 88,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_023",
+    "text": "Don't buy another cleanser until you see this",
+    "category": "beauty",
+    "engagementScore": 87,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_024",
+    "text": "My skin cleared in 14 days - here's how",
+    "category": "beauty",
+    "engagementScore": 93,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_025",
+    "text": "The sunscreen trick dermatologists actually use",
+    "category": "beauty",
+    "engagementScore": 85,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_026",
+    "text": "If you have oily skin, try this at night",
+    "category": "beauty",
+    "engagementScore": 84,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_027",
+    "text": "I found the viral toner that's actually worth it",
+    "category": "beauty",
+    "engagementScore": 90,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_028",
+    "text": "I made my first $1,000 online with this",
+    "category": "finance",
+    "engagementScore": 91,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_029",
+    "text": "Stop doing this if you want to save money",
+    "category": "finance",
+    "engagementScore": 86,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_030",
+    "text": "The budget method that finally worked for me",
+    "category": "finance",
+    "engagementScore": 84,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_031",
+    "text": "I automated my bills and saved $300/month",
+    "category": "finance",
+    "engagementScore": 88,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_032",
+    "text": "Side hustle ideas nobody is talking about",
+    "category": "finance",
+    "engagementScore": 82,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_033",
+    "text": "I fixed my credit score in 90 days",
+    "category": "finance",
+    "engagementScore": 85,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_034",
+    "text": "This app found me money I didn't know I had",
+    "category": "finance",
+    "engagementScore": 83,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_035",
+    "text": "If you hate cooking, watch this",
+    "category": "food",
+    "engagementScore": 87,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_036",
+    "text": "This 5-minute recipe tastes expensive",
+    "category": "food",
+    "engagementScore": 88,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_037",
+    "text": "I meal prepped for $25 this week",
+    "category": "food",
+    "engagementScore": 82,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_038",
+    "text": "The protein snack I keep rebuying",
+    "category": "food",
+    "engagementScore": 80,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_039",
+    "text": "Air fryer hack that saves so much time",
+    "category": "food",
+    "engagementScore": 86,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_040",
+    "text": "You can make this in one pan",
+    "category": "food",
+    "engagementScore": 79,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_041",
+    "text": "This gadget replaced three things on my desk",
+    "category": "tech",
+    "engagementScore": 89,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_042",
+    "text": "The productivity shortcut I wish I knew sooner",
+    "category": "tech",
+    "engagementScore": 85,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_043",
+    "text": "If you work from home, you need this",
+    "category": "tech",
+    "engagementScore": 90,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_044",
+    "text": "I upgraded my setup for under $50",
+    "category": "tech",
+    "engagementScore": 84,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_045",
+    "text": "The charger that finally stopped overheating",
+    "category": "tech",
+    "engagementScore": 82,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_046",
+    "text": "This app organizes my entire week",
+    "category": "tech",
+    "engagementScore": 87,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_047",
+    "text": "Stop stretching like this if you get sore",
+    "category": "fitness",
+    "engagementScore": 88,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_048",
+    "text": "This 10-minute workout changed my mornings",
+    "category": "fitness",
+    "engagementScore": 86,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_049",
+    "text": "The supplement I take before every workout",
+    "category": "fitness",
+    "engagementScore": 83,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_050",
+    "text": "I lost 5 pounds doing this simple switch",
+    "category": "fitness",
+    "engagementScore": 90,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_051",
+    "text": "If you hate the gym, try this",
+    "category": "fitness",
+    "engagementScore": 85,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_052",
+    "text": "My back pain disappeared after this routine",
+    "category": "fitness",
+    "engagementScore": 89,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_053",
+    "text": "The habit that made me drink more water",
+    "category": "fitness",
+    "engagementScore": 81,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_054",
+    "text": "The toy that finally tires my dog out",
+    "category": "pets",
+    "engagementScore": 88,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_055",
+    "text": "If your cat ignores toys, try this",
+    "category": "pets",
+    "engagementScore": 84,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_056",
+    "text": "This fixed my dog's pulling in one week",
+    "category": "pets",
+    "engagementScore": 86,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_057",
+    "text": "The pet odor hack I swear by",
+    "category": "pets",
+    "engagementScore": 82,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_058",
+    "text": "Every pet owner needs this brush",
+    "category": "pets",
+    "engagementScore": 83,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_059",
+    "text": "My dog stopped shedding after I used this",
+    "category": "pets",
+    "engagementScore": 85,
+    "source": "manual_curation"
+  },
+  {
+    "id": "hook_060",
+    "text": "This treat keeps my puppy calm",
+    "category": "pets",
+    "engagementScore": 80,
+    "source": "manual_curation"
   }
 ]

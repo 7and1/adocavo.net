@@ -8,7 +8,7 @@ import { auth } from "@/lib/auth";
 import { getDB, getD1 } from "@/lib/cloudflare";
 import { createFavoriteService } from "@/lib/services/favorites";
 import { favoriteRequestSchema } from "@/lib/validations";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -57,11 +57,8 @@ export const POST = withErrorHandler(async (request: Request) => {
   const d1 = getD1();
 
   // Rate limit using user ID for authenticated users
-  const rate = await checkRateLimit(
-    db,
-    { type: "user", value: session.user.id },
-    "favorites",
-  );
+  const { identifier, tier } = await getRateLimitContext(request, session);
+  const rate = await checkRateLimit(db, identifier, "favorites", tier);
   if (!rate.allowed) {
     return NextResponse.json(
       {
@@ -115,11 +112,8 @@ export const DELETE = withErrorHandler(async (request: Request) => {
   const d1 = getD1();
 
   // Rate limit using user ID for authenticated users
-  const rate = await checkRateLimit(
-    db,
-    { type: "user", value: session.user.id },
-    "favorites",
-  );
+  const { identifier, tier } = await getRateLimitContext(request, session);
+  const rate = await checkRateLimit(db, identifier, "favorites", tier);
   if (!rate.allowed) {
     return NextResponse.json(
       {

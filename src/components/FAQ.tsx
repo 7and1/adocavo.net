@@ -11,11 +11,11 @@ const faqs = [
   },
   {
     q: "How many credits do I need?",
-    a: "Each script generation uses 1 credit and produces 3 variations. New users get 10 free credits to start. If you're testing multiple products or angles, credit packs are available: 20 credits for $29, 50 credits for $59, or 100 credits for $99.",
+    a: "Each script generation uses 1 credit and produces 3 variations. New users get 10 free credits to start. When you run out, you can join the waitlist for premium access and future credit options.",
   },
   {
     q: "What categories do you support?",
-    a: "Our hook library covers 50+ patterns across beauty, tech, fitness, food, fashion, home goods, pets, gaming, finance, education, travel, and automotive. Each category has proven hooks that work for that specific niche.",
+    a: "Our hook library covers 50+ patterns across beauty, tech, fitness, food, finance, and pets. Each category includes proven hooks tailored to that niche.",
   },
   {
     q: "Can I use these for Instagram Reels too?",
@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: "Do scripts sound like AI?",
-    a: "No. Our AI is trained on viral TikTok ads and uses casual language, contractions, and conversational phrasing. Scripts sound like real UGC creators, not corporate copy. You can regenerate any script until you get the perfect version.",
+    a: "No. Our AI is guided by real viral examples and uses casual, creator-style language. Scripts are designed to feel like authentic UGC, not corporate copy. You can generate multiple variations by remixing additional hooks.",
   },
 ];
 

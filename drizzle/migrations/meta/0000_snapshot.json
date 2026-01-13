@@ -447,6 +447,11 @@
           "name": "script_favorites_script_idx",
           "columns": ["generated_script_id"],
           "isUnique": false
+        },
+        "script_favorites_user_script_unique": {
+          "name": "script_favorites_user_script_unique",
+          "columns": ["user_id", "generated_script_id"],
+          "isUnique": true
         }
       },
       "foreignKeys": {
@@ -469,13 +474,13 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "script_favorites_user_id_generated_script_id_pk": {
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "script_favorites_user_script_unique": {
           "columns": ["user_id", "generated_script_id"],
-          "name": "script_favorites_user_id_generated_script_id_pk"
+          "name": "script_favorites_user_script_unique"
         }
       },
-      "uniqueConstraints": {},
       "checkConstraints": {}
     },
     "script_ratings": {

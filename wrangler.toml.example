@@ -1,50 +1,99 @@
+# ============================================================================
+# Adocavo Cloudflare Workers Configuration
+# ============================================================================
+# This file configures the Cloudflare Worker deployment for Adocavo.
+# Copy this file to wrangler.toml and fill in your values.
+#
+# SETUP INSTRUCTIONS:
+# 1. Create KV namespaces:
+#    wrangler kv namespace create NEXT_INC_CACHE_KV
+#    wrangler kv namespace create NEXT_INC_CACHE_KV --preview
+#    wrangler kv namespace create NEXT_TAG_CACHE_KV
+#    wrangler kv namespace create NEXT_TAG_CACHE_KV --preview
+#    wrangler kv namespace create CACHE_KV
+#    wrangler kv namespace create CACHE_KV --preview
+#
+# 2. Create D1 databases:
+#    wrangler d1 create adocavo-db
+#    wrangler d1 create adocavo-db-preview
+#    wrangler d1 create adocavo-db-dev
+#
+# 3. Set secrets (use scripts/setup-secrets.sh):
+#    wrangler secret put NEXTAUTH_SECRET
+#    wrangler secret put GOOGLE_CLIENT_ID
+#    wrangler secret put GOOGLE_CLIENT_SECRET
+#    wrangler secret put GITHUB_CLIENT_ID
+#    wrangler secret put GITHUB_CLIENT_SECRET
+#
+# 4. Deploy:
+#    npm run deploy
+# ============================================================================
+
 name = "adocavo-net"
 main = ".open-next/worker.js"
 compatibility_date = "2026-01-09"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+# account_id = "YOUR_ACCOUNT_ID_HERE" # Optional: Set to avoid --account-id flag
 
+# Assets binding for OpenNext
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
 
 # KV Namespaces for Next.js caching
-# Create production: wrangler kv namespace create NEXT_INC_CACHE_KV
-# Create preview: wrangler kv namespace create NEXT_INC_CACHE_KV --preview
+# Production KV namespaces (required)
 [[kv_namespaces]]
 binding = "NEXT_INC_CACHE_KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
-preview_id = "REPLACE_WITH_KV_PREVIEW_ID"
+id = "REPLACE_WITH_PRODUCTION_INC_CACHE_KV_ID"
+preview_id = "REPLACE_WITH_PREVIEW_INC_CACHE_KV_ID"
 
-# Create production: wrangler kv namespace create NEXT_TAG_CACHE_KV
-# Create preview: wrangler kv namespace create NEXT_TAG_CACHE_KV --preview
 [[kv_namespaces]]
 binding = "NEXT_TAG_CACHE_KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
-preview_id = "REPLACE_WITH_KV_PREVIEW_ID"
+id = "REPLACE_WITH_PRODUCTION_TAG_CACHE_KV_ID"
+preview_id = "REPLACE_WITH_PREVIEW_TAG_CACHE_KV_ID"
 
+# KV Namespace for application-level caching (hooks, ratings, favorites)
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "REPLACE_WITH_PRODUCTION_CACHE_KV_ID"
+preview_id = "REPLACE_WITH_PREVIEW_CACHE_KV_ID"
+
+# Service binding for self-reference (required for Next.js)
 [[services]]
 binding = "WORKER_SELF_REFERENCE"
 service = "adocavo-net"
 
-# D1 Database - Primary data storage
-# Create: wrangler d1 create adocavo-db
-# Then paste the database_id below
+# D1 Database - Primary data storage (required)
 [[d1_databases]]
 binding = "DB"
 database_name = "adocavo-db"
-database_id = "" # Fill after: wrangler d1 create adocavo-db
+database_id = "REPLACE_WITH_PRODUCTION_DATABASE_ID"
+migrations_dir = "drizzle/migrations"
 
-# AI Binding - Workers AI for script generation
+# AI Binding - Workers AI for script generation (required)
 [ai]
 binding = "AI"
 
-# Environment variables
+# Environment variables for production (required)
 [vars]
 NEXTAUTH_URL = "https://adocavo.net"
 NODE_ENV = "production"
 AI_MODEL_SIZE = "8b"
 AI_STREAMING = "false"
+NEXT_PUBLIC_SITE_URL = "https://adocavo.net"
+NEXT_PUBLIC_IMAGE_LOADER = "cloudflare"
+LOG_DRAIN_PROVIDER = "generic"
+LOG_LEVEL = "info"
 
+# Custom domain routes (optional - configure in Cloudflare dashboard instead)
+# routes = [
+#   { pattern = "adocavo.net/*", zone_name = "adocavo.net" },
+#   { pattern = "www.adocavo.net/*", zone_name = "adocavo.net" }
+# ]
+
+# ============================================================================
+# Preview Environment (for pull request deployments)
+# ============================================================================
 [env.preview]
 name = "adocavo-preview"
 
@@ -55,13 +104,20 @@ service = "adocavo-preview"
 [[env.preview.d1_databases]]
 binding = "DB"
 database_name = "adocavo-db-preview"
-database_id = "" # Fill after: wrangler d1 create adocavo-db-preview
+database_id = "REPLACE_WITH_PREVIEW_DATABASE_ID"
+migrations_dir = "drizzle/migrations"
 
 [env.preview.vars]
 NEXTAUTH_URL = "https://preview.adocavo.net"
 AI_MODEL_SIZE = "8b"
 AI_STREAMING = "false"
+NEXT_PUBLIC_SITE_URL = "https://preview.adocavo.net"
+NEXT_PUBLIC_IMAGE_LOADER = "cloudflare"
+LOG_DRAIN_PROVIDER = "generic"
 
+# ============================================================================
+# Development Environment (for local testing)
+# ============================================================================
 [env.development]
 name = "adocavo-dev"
 
@@ -72,9 +128,44 @@ service = "adocavo-dev"
 [[env.development.d1_databases]]
 binding = "DB"
 database_name = "adocavo-db-dev"
-database_id = "" # Fill after: wrangler d1 create adocavo-db-dev
+database_id = "REPLACE_WITH_DEV_DATABASE_ID"
+migrations_dir = "drizzle/migrations"
 
 [env.development.vars]
 NEXTAUTH_URL = "http://localhost:3000"
 AI_MODEL_SIZE = "8b"
 AI_STREAMING = "false"
+NEXT_PUBLIC_SITE_URL = "http://localhost:3000"
+NEXT_PUBLIC_IMAGE_LOADER = "cloudflare"
+LOG_DRAIN_PROVIDER = "generic"
+
+# ============================================================================
+# Additional Configuration Notes
+# ============================================================================
+#
+# SECRETS (set via wrangler or Cloudflare dashboard):
+# - NEXTAUTH_SECRET: Generate with: openssl rand -base64 32
+# - GOOGLE_CLIENT_ID: From Google Cloud Console OAuth app
+# - GOOGLE_CLIENT_SECRET: From Google Cloud Console OAuth app
+# - GITHUB_CLIENT_ID: From GitHub Developer Settings OAuth app
+# - GITHUB_CLIENT_SECRET: From GitHub Developer Settings OAuth app
+# - LOG_DRAIN_URL: Optional: URL for external log drain service
+# - LOG_DRAIN_TOKEN: Optional: Auth token for log drain service
+# - ALERT_WEBHOOK_URL: Optional: Webhook URL for alert notifications
+#
+# MIGRATIONS:
+# - Run migrations: wrangler d1 migrations apply adocavo-db --remote
+# - Run migrations for preview: wrangler d1 migrations apply adocavo-db-preview --remote --env preview
+# - Run migrations for dev: wrangler d1 migrations apply adocavo-db-dev --remote --env development
+#
+# DEPLOYMENT:
+# - Production: npm run deploy
+# - Preview: npm run deploy:preview
+# - Manual: wrangler deploy
+# - With specific environment: wrangler deploy --env preview
+#
+# LOGS:
+# - Tail logs: wrangler tail
+# - Tail preview logs: wrangler tail --env preview
+# ============================================================================
+

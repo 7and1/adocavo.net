@@ -1,6 +1,9 @@
 import { getAllBlogPosts } from "@/lib/blog";
 import { getBindings } from "@/lib/cloudflare";
 import { getCategories, getHooks } from "@/lib/services/hooks";
+import { HOOK_CATEGORIES } from "@/lib/validations";
+import { getSeedCategories, getSeedHooks } from "@/lib/seed-hooks";
+import { nichePlaybooks } from "@/data/example-niches";
 
 interface SitemapEntry {
   url: string;
@@ -20,8 +23,11 @@ export default async function sitemap(): Promise<SitemapEntry[]> {
   const urls: SitemapEntry[] = [
     { url: `${baseUrl}/`, changeFrequency: "daily", priority: 1.0 },
     { url: `${baseUrl}/blog`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/examples`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/about`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/pricing`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/privacy`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/terms`, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const blogPosts = getAllBlogPosts();
@@ -34,32 +40,48 @@ export default async function sitemap(): Promise<SitemapEntry[]> {
     });
   });
 
+  HOOK_CATEGORIES.forEach((category) => {
+    urls.push({
+      url: `${baseUrl}/examples/${category}-tiktok-ads`,
+      changeFrequency: "monthly",
+      priority: 0.65,
+    });
+  });
+
+  nichePlaybooks.forEach((playbook) => {
+    urls.push({
+      url: `${baseUrl}/examples/${playbook.slug}`,
+      changeFrequency: "monthly",
+      priority: 0.65,
+    });
+  });
+
   const env = getBindings();
-  if (env.DB) {
-    const [hooks, categories] = await Promise.all([
-      getHooks(env.DB as D1Database, { limit: 500, page: 1 }),
-      getCategories(env.DB as D1Database),
-    ]);
+  const hooks = env.DB
+    ? await getHooks(env.DB as D1Database, { limit: 500, page: 1 })
+    : getSeedHooks({ limit: 500, page: 1 });
+  const categories = env.DB
+    ? await getCategories(env.DB as D1Database)
+    : getSeedCategories();
 
-    // Category pages have high priority for SEO
-    categories.forEach((category) => {
-      urls.push({
-        url: `${baseUrl}/category/${category.category}`,
-        changeFrequency: "weekly",
-        priority: 0.9,
-      });
+  // Category pages have high priority for SEO
+  categories.forEach((category) => {
+    urls.push({
+      url: `${baseUrl}/category/${category.category}`,
+      changeFrequency: "weekly",
+      priority: 0.9,
     });
+  });
 
-    // Hook pages with dynamic priority based on engagement
-    hooks.forEach((hook) => {
-      urls.push({
-        url: `${baseUrl}/hook/${hook.id}`,
-        lastModified: new Date(hook.updatedAt),
-        changeFrequency: "monthly",
-        priority: getPriorityFromEngagement(hook.engagementScore),
-      });
+  // Hook pages with dynamic priority based on engagement
+  hooks.forEach((hook) => {
+    urls.push({
+      url: `${baseUrl}/hook/${hook.id}`,
+      lastModified: new Date(hook.updatedAt),
+      changeFrequency: "monthly",
+      priority: getPriorityFromEngagement(hook.engagementScore),
     });
-  }
+  });
 
   return urls;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import {
   Dialog,
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, Sparkles, Mail } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export interface WaitlistModalProps {
   open: boolean;
@@ -104,6 +105,10 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 
       if (!response.ok) throw new Error("Failed to join waitlist");
 
+      trackEvent("waitlist_submit", {
+        featureInterest,
+        userTier,
+      });
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -113,7 +118,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
   };
 
   // Reset form when modal opens
-  useMemo(() => {
+  useEffect(() => {
     if (open) {
       setEmail(session?.user?.email || "");
       setSubmitted(false);

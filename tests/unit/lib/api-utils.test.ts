@@ -250,9 +250,9 @@ describe("API Utils", () => {
     });
 
     it("should catch AppError and return error response", async () => {
-      const handler = vi
-        .fn()
-        .mockRejectedValue(new NotFoundError("Resource not found"));
+      const handler = vi.fn().mockImplementation(async () => {
+        throw new NotFoundError("Resource not found");
+      });
 
       const wrapped = withErrorHandler(handler);
       const response = await wrapped(new Request("https://example.com"));
@@ -264,7 +264,9 @@ describe("API Utils", () => {
     });
 
     it("should catch generic Error and return internal error", async () => {
-      const handler = vi.fn().mockRejectedValue(new Error("Unexpected error"));
+      const handler = vi.fn().mockImplementation(async () => {
+        throw new Error("Unexpected error");
+      });
 
       const wrapped = withErrorHandler(handler);
       const response = await wrapped(new Request("https://example.com"));
@@ -287,8 +289,8 @@ describe("API Utils", () => {
     });
 
     it("should handle ZodError from handler", async () => {
-      const handler = vi.fn().mockRejectedValue(
-        new ZodError([
+      const handler = vi.fn().mockImplementation(async () => {
+        throw new ZodError([
           {
             code: "invalid_type",
             expected: "string",
@@ -296,8 +298,8 @@ describe("API Utils", () => {
             path: ["field"],
             message: "Invalid type",
           },
-        ]),
-      );
+        ]);
+      });
 
       const wrapped = withErrorHandler(handler);
       const response = await wrapped(new Request("https://example.com"));

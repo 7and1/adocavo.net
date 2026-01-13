@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Header } from "@/components/Header";
-import { Button } from "@/components/ui/button";
 import { getBindings } from "@/lib/cloudflare";
 import { getHookById, getHooks } from "@/lib/services/hooks";
+import { getHookRatingStats } from "@/lib/services/ratings";
 import {
   generateMetadata as buildMetadata,
   pageMetadata,
@@ -12,7 +12,9 @@ import {
   getCreativeWorkJsonLd,
   safeJsonLdStringify,
 } from "@/lib/seo";
+import { getSeedHookById, getSeedHooks } from "@/lib/seed-hooks";
 import type { HookCategory } from "@/lib/validations";
+import { HookDetailContent } from "./HookDetailContent";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -21,14 +23,9 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const env = getBindings();
-  if (!env.DB) {
-    return buildMetadata({
-      title: "Hook Not Found",
-      description: "Database unavailable",
-    });
-  }
-
-  const hook = await getHookById(env.DB as D1Database, id);
+  const hook = env.DB
+    ? await getHookById(env.DB as D1Database, id)
+    : getSeedHookById(id);
   if (!hook) {
     return buildMetadata({
       title: "Hook Not Found",
@@ -37,6 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const seo = pageMetadata.hook(hook.text, hook.category, hook.engagementScore);
+  const ogImage = `https://adocavo.net/hook/${id}/opengraph-image`;
   return buildMetadata({
     ...seo,
     alternatives: {
@@ -47,11 +45,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: seo.title,
       description: seo.description,
       url: `https://adocavo.net/hook/${id}`,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: seo.title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: seo.title,
       description: seo.description,
+      images: [ogImage],
     },
   });
 }
@@ -59,13 +66,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HookDetailPage({ params }: Props) {
   const { id } = await params;
   const env = getBindings();
-  if (!env.DB) {
-    return (
-      <div className="text-center text-gray-500">Database unavailable.</div>
-    );
-  }
-
-  const hook = await getHookById(env.DB as D1Database, id);
+  const hook = env.DB
+    ? await getHookById(env.DB as D1Database, id)
+    : getSeedHookById(id);
   if (!hook) {
     notFound();
   }
@@ -82,17 +85,34 @@ export default async function HookDetailPage({ params }: Props) {
     { name: hook.text.substring(0, 40), url: `https://adocavo.net/hook/${id}` },
   ]);
 
-  const creativeWorkJsonLd = getCreativeWorkJsonLd({
-    id: hook.id,
-    text: hook.text,
-    category: hook.category,
-    engagementScore: hook.engagementScore,
-  });
+  const ratingStats = env.DB
+    ? await getHookRatingStats(env.DB as D1Database, hook.id)
+    : null;
 
-  const relatedHooks = await getHooks(env.DB as D1Database, {
-    category: hook.category as HookCategory,
-    limit: 4,
-  }).then((hooks) => hooks.filter((h) => h.id !== hook.id).slice(0, 3));
+  const creativeWorkJsonLd = getCreativeWorkJsonLd(
+    {
+      id: hook.id,
+      text: hook.text,
+      category: hook.category,
+      engagementScore: hook.engagementScore,
+    },
+    ratingStats && ratingStats.totalRatings > 0 ? ratingStats : undefined,
+  );
+
+  const relatedHooks = (
+    env.DB
+      ? await getHooks(env.DB as D1Database, {
+          category: hook.category as HookCategory,
+          limit: 4,
+        })
+      : getSeedHooks({
+          category: hook.category as HookCategory,
+          limit: 4,
+          page: 1,
+        })
+  )
+    .filter((h) => h.id !== hook.id)
+    .slice(0, 3);
 
   return (
     <>
@@ -147,16 +167,7 @@ export default async function HookDetailPage({ params }: Props) {
             generate three unique TikTok ad script angles.
           </p>
 
-          <div className="flex items-center gap-3">
-            <Button asChild>
-              <Link href={`/remix/${hook.id}`}>Remix this Hook</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href={`/category/${hook.category}`}>
-                Browse {hook.category} hooks
-              </Link>
-            </Button>
-          </div>
+          <HookDetailContent hook={hook} />
 
           <section className="pt-8 border-t">
             <h2 className="text-xl font-semibold mb-4">About this hook</h2>
@@ -169,6 +180,17 @@ export default async function HookDetailPage({ params }: Props) {
                 <p className="text-sm text-gray-500 mb-1">Engagement Score</p>
                 <p className="font-medium">{hook.engagementScore}/100</p>
               </div>
+              {ratingStats && ratingStats.totalRatings > 0 && (
+                <div className="rounded-xl border bg-gray-50 p-4">
+                  <p className="text-sm text-gray-500 mb-1">
+                    Average Script Rating
+                  </p>
+                  <p className="font-medium">
+                    {ratingStats.averageRating.toFixed(1)} / 5 (
+                    {ratingStats.totalRatings} ratings)
+                  </p>
+                </div>
+              )}
             </div>
           </section>
 

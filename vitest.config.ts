@@ -7,6 +7,7 @@ export default defineConfig({
     include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"],
     exclude: ["node_modules", "dist"],
     globals: true,
+    setupFiles: ["./tests/setup.ts"],
     coverage: {
       include: ["src/**/*.ts", "src/**/*.tsx"],
       exclude: [

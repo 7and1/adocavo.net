@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const post = getPostBySlug(slug);
     const baseUrl = "https://adocavo.net";
+    const ogImage = `${baseUrl}/blog/${post.slug}/opengraph-image`;
     return {
       title: `${post.title} | Adocavo Blog`,
       description: post.excerpt,
@@ -44,31 +45,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         modifiedTime: post.updatedAt,
         authors: ["Adocavo Intelligence"],
         tags: post.tags,
-        images: post.featuredImage
-          ? [
-              {
-                url: `${baseUrl}${post.featuredImage}`,
-                width: 1200,
-                height: 630,
-                alt: post.title,
-              },
-            ]
-          : [
-              {
-                url: `${baseUrl}/og-default.svg`,
-                width: 1200,
-                height: 630,
-                alt: post.title,
-              },
-            ],
+        images: [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: post.title,
+          },
+        ],
       },
       twitter: {
         card: "summary_large_image",
         title: post.title,
         description: post.excerpt,
-        images: post.featuredImage
-          ? [`${baseUrl}${post.featuredImage}`]
-          : [`${baseUrl}/og-default.svg`],
+        images: [ogImage],
       },
       alternates: {
         canonical: `${baseUrl}/blog/${post.slug}`,

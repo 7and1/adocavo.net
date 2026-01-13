@@ -22,6 +22,7 @@ vi.mock("@/lib/prompts", () => ({
   buildUserPrompt: vi.fn(
     (hook: string, product: string) => `Hook: ${hook}\nProduct: ${product}`,
   ),
+  validateScriptOutput: vi.fn(() => ({ valid: true })),
 }));
 
 describe("GenerationService", () => {
@@ -120,7 +121,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(false);
@@ -137,7 +138,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "nonexistent-hook",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(false);
@@ -157,7 +158,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(false);
@@ -172,14 +173,16 @@ describe("GenerationService", () => {
         isActive: true,
         text: "Test",
       });
-      mockAi.run = vi.fn().mockRejectedValue(new Error("AI service down"));
+      mockAi.run = vi.fn().mockImplementation(async () => {
+        throw new Error("AI service down");
+      });
 
       const service = new GenerationService(mockAi, mockDb);
 
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(false);
@@ -203,7 +206,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(false);
@@ -227,7 +230,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(false);
@@ -253,7 +256,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(false);
@@ -285,9 +288,9 @@ describe("GenerationService", () => {
         async (callback: (tx: any) => Promise<void>) => {
           const mockTx = {
             insert: vi.fn().mockReturnValue({
-              values: vi
-                .fn()
-                .mockRejectedValue(new Error("DB connection lost")),
+              values: vi.fn().mockImplementation(async () => {
+                throw new Error("DB connection lost");
+              }),
             }),
           };
           await callback(mockTx);
@@ -299,7 +302,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(false);
@@ -326,7 +329,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(true);
@@ -363,7 +366,7 @@ describe("GenerationService", () => {
       const result = await service.generate({
         userId: "user-1",
         hookId: "hook-1",
-        productDescription: "Test product",
+        productDescription: "This is a test product description",
       });
 
       expect(result.success).toBe(true);
@@ -428,7 +431,7 @@ describe("generateScripts - standalone function", () => {
     const result = await generateScripts(mockAi as any, mockD1, {
       userId: "user-1",
       hookId: "hook-1",
-      productDescription: "Test product",
+      productDescription: "This is a test product description",
     });
 
     expect(actualCreateDb).toHaveBeenCalledWith(mockD1);

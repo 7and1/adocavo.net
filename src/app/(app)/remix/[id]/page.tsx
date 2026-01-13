@@ -1,11 +1,24 @@
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { getBindings } from "@/lib/cloudflare";
 import { getHookById } from "@/lib/services/hooks";
 import { ScriptGenerator } from "@/components/ScriptGenerator";
+import { generateMetadata as buildMetadata } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  return buildMetadata({
+    title: "Remix Hook",
+    description:
+      "Generate three TikTok ad script angles from a proven hook in seconds.",
+    canonical: `https://adocavo.net/remix/${id}`,
+    noindex: true,
+  });
 }
 
 export default async function RemixPage({ params }: Props) {

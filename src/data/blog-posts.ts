@@ -1439,4 +1439,986 @@ Your answers are your hooks. Build your ad around the strongest one.
     tags: ["examples", "case studies", "tiktok ads", "breakdowns"],
     featuredImage: "/og-default.svg",
   },
+  {
+    id: "post_009",
+    slug: "tiktok-ad-copywriting-tips",
+    title: "TikTok Ad Copywriting Tips: 12 Micro-Edits That Lift CTR",
+    excerpt:
+      "Twelve copywriting tweaks that make TikTok ads feel native, boost watch time, and improve CTR without changing your creative concept.",
+    content: `# TikTok Ad Copywriting Tips: 12 Micro-Edits That Lift CTR
+
+Great TikTok ads don't read like ads. They read like a creator talking to a friend. These 12 micro-edits will make your scripts more native, more believable, and more clickable.
+
+## 1) Start with a verb, not a noun
+
+**Weak:** "This skincare routine changed my skin."
+
+**Stronger:** "Stop using your cleanser like this."
+
+Verbs create motion and urgency. TikTok rewards motion.
+
+## 2) Use a specific number, even if it's small
+
+**Weak:** "This saved me money."
+
+**Stronger:** "This saved me $27 last week."
+
+Specificity makes the claim feel real.
+
+## 3) Add a soft confession
+
+**Example:** "I didn't want to like this, but it worked."
+
+Confessions signal honesty and reduce skepticism.
+
+## 4) Use the 2-second hook rule
+
+If your hook can't be read aloud in 2 seconds, it's too long. Cut every extra word.
+
+## 5) Lead with the pain, not the product
+
+**Weak:** "I found this sleep supplement."
+
+**Stronger:** "I couldn't fall asleep before 2 a.m."
+
+Pain builds relevance. Product can wait.
+
+## 6) Turn claims into scenes
+
+**Claim:** "It reduces oil."
+
+**Scene:** "By noon my T-zone is always shiny. This fixed it."
+
+Scenes make benefits visual, even without footage.
+
+## 7) Use contrast words
+
+Add words like **but**, **instead**, **finally**, **until**. They signal change and keep attention.
+
+## 8) Shorten your CTA
+
+**Weak:** "If you want to learn more, click the link in bio."
+
+**Stronger:** "Link in bio."
+
+TikTok is fast. Make the CTA fast too.
+
+## 9) Add a timebox
+
+**Example:** "I gave it 7 days. Here's what happened."
+
+Timeboxes create a mini story arc and improve completion rate.
+
+## 10) Use one strong adjective per sentence
+
+**Too much:** "This insane, crazy, unbelievable serum is amazing."
+
+**Better:** "This serum is insane."
+
+Less hype = more trust.
+
+## 11) Add friction to sound honest
+
+**Example:** "It's not cheap, but it works."
+
+Friction creates balance, which makes the positive claim believable.
+
+## 12) End with a decision point
+
+**Example:** "Try it this week or skip it forever."
+
+Decision language drives action and urgency.
+
+## Quick Edit Checklist
+
+- Can the hook be read in 2 seconds?
+- Does the second line describe a real problem?
+- Is there a number or timeframe?
+- Is the CTA under 3 words?
+- Does it sound like a friend, not a brand?
+
+## Example: Before + After
+
+**Before:** "We launched a new collagen powder. It helps with skin."
+
+**After:** "My skin looked tired every morning. I tried this collagen for 14 days. The glow is back. Link in bio."
+
+Small edits. Big difference.
+
+---
+
+**Need hooks that already convert?** Browse the Adocavo hook library and generate scripts built for TikTok's native style.`,
+    publishedAt: "2026-01-10",
+    updatedAt: "2026-01-10",
+    tags: ["copywriting", "tiktok ads", "conversion", "tips"],
+    featuredImage: "/og-default.svg",
+  },
+  {
+    id: "post_010",
+    slug: "finance-tiktok-ad-hooks",
+    title: "Finance TikTok Ad Hooks: 25 Angles for Side Hustles and Money Apps",
+    excerpt:
+      "Steal 25 high-performing finance hook angles for side hustles, budgeting apps, and money tools. Includes scripts and CTA ideas.",
+    content: `# Finance TikTok Ad Hooks: 25 Angles for Side Hustles and Money Apps
+
+Finance ads win when they feel simple and achievable. Use these 25 hook angles to sell money tools, budgeting apps, courses, or side hustle offers.
+
+## 1) The income proof hook
+
+"I made $142 yesterday with this 10-minute habit."
+
+## 2) The myth-busting hook
+
+"Saving money won't make you rich. This will."
+
+## 3) The time-poor hook
+
+"If you only have 20 minutes a day, do this."
+
+## 4) The beginner hook
+
+"No experience, no money, still worked."
+
+## 5) The debt freedom hook
+
+"I paid off $3,200 with this rule."
+
+## 6) The automation hook
+
+"I automated my savings in 3 clicks."
+
+## 7) The budget fix hook
+
+"My budget finally stuck after this."
+
+## 8) The side hustle proof hook
+
+"I tested 5 side hustles. This one actually paid."
+
+## 9) The salary shortcut hook
+
+"This raised my hourly rate without working more."
+
+## 10) The first $1K hook
+
+"Here's how I made my first $1,000 online."
+
+## 11) The fear hook
+
+"If you still keep money in a checking account, watch this."
+
+## 12) The calculator hook
+
+"This calculator showed me how broke I was."
+
+## 13) The visual receipts hook
+
+"Look at my deposit notifications this week."
+
+## 14) The no-spend hook
+
+"I tried a no-spend week. Here's what I learned."
+
+## 15) The challenge hook
+
+"Try this 7-day cash challenge with me."
+
+## 16) The friction hook
+
+"It's boring, but it works."
+
+## 17) The student hook
+
+"This is how I survived college without debt."
+
+## 18) The parent hook
+
+"Parents: this saves me $200 every month."
+
+## 19) The credit score hook
+
+"My credit score jumped 42 points in 30 days."
+
+## 20) The subscription hook
+
+"I canceled 8 subscriptions with this app."
+
+## 21) The trend hook
+
+"Everyone is talking about this money move. Here's why."
+
+## 22) The split test hook
+
+"I tested two budgeting methods. One crushed the other."
+
+## 23) The recession hook
+
+"If you're worried about layoffs, do this now."
+
+## 24) The milestone hook
+
+"I hit my savings goal 3 months early."
+
+## 25) The habit stack hook
+
+"I stack this habit with my morning coffee."
+
+## 3 Script Templates You Can Use Today
+
+### Template A: Simple Win
+
+**[0-3s]** I saved $[amount] in [timeframe] with this.
+
+**[3-10s]** I used to [old behavior/problem].
+
+**[10-20s]** Then I tried [tool/app/offer] and it made it stupid easy.
+
+**[20-30s]** Here's the exact step I did: [step].
+
+**[30-35s]** Link in bio if you want the template.
+
+### Template B: Myth Bust
+
+**[0-3s]** Saving money won't fix this problem.
+
+**[3-12s]** What actually works is [system].
+
+**[12-25s]** I used it for [timeframe] and [result].
+
+**[25-35s]** If you're serious about [goal], grab it now.
+
+### Template C: Quick Proof
+
+**[0-3s]** Watch this deposit hit.
+
+**[3-10s]** This happened after I set up [system].
+
+**[10-20s]** It takes 5 minutes and you can copy it.
+
+**[20-30s]** Link in bio.
+
+## CTA Ideas
+
+- "Grab the free template."
+- "Try it for 7 days."
+- "Join the challenge."
+- "Download the calculator."
+
+---
+
+**Need finance-ready hooks instantly?** Filter the Adocavo library by finance and remix a proven hook in seconds.`,
+    publishedAt: "2026-01-12",
+    updatedAt: "2026-01-12",
+    tags: ["finance", "hooks", "side hustle", "tiktok ads"],
+    featuredImage: "/og-default.svg",
+  },
+  {
+    id: "post_011",
+    slug: "case-study-ecommerce-10k-sales",
+    title:
+      "Case Study: How This E-commerce Brand Got 10K Sales with TikTok Ads",
+    excerpt:
+      "Deep dive into how a DTC skincare brand scaled from 0 to 10,000 sales in 6 months using TikTok ads. Includes exact hooks, creatives, and budget breakdown.",
+    content: `# Case Study: How This E-commerce Brand Got 10K Sales with TikTok Ads
+
+In 6 months, GlowRoutine (a fictional mid-tier skincare brand) went from zero TikTok presence to 10,000+ sales directly attributed to TikTok ads. Here's exactly how they did it, including the hooks, creatives, and strategy you can copy.
+
+## The Brand Snapshot
+
+**GlowRoutine** (name changed)
+- Product: Vitamin C serum for acne-prone skin
+- Price point: $38
+- Target audience: Women 18-34 struggling with acne
+- Previous experience: Instagram ads only (2.5x ROAS)
+- TikTok starting budget: $500/month
+- 6-month result: 10,247 sales, $389,386 revenue, 3.8x ROAS
+
+## Month 1-2: Testing Phase
+
+### Budget: $500/month ($125/week)
+
+**Strategy:** Test 15 different hooks with small spends to find winners.
+
+**The Winning Hooks (Top 3 Performers):**
+
+1. **"Don't buy retinol until you watch this"** - 3.2% CTR
+   - Hook: skepticism-based education
+   - Angle: Our retinol alternative is gentler
+   - Result: $2.40 CPC, 2.1% conversion rate
+
+2. **"Stop scrolling if you have textured skin"** - 2.8% CTR
+   - Hook: direct callout
+   - Angle: specific problem solution
+   - Result: $2.80 CPC, 1.9% conversion rate
+
+3. **"I tried everything. Nothing worked. Then this."** - 2.4% CTR
+   - Hook: failure story
+   - Angle: authentic struggle
+   - Result: $3.10 CPC, 2.4% conversion rate
+
+**Key Learning:** The "don't buy" hook had highest CTR, but the "failure story" had highest conversion rate.
+
+## Month 3-4: Scaling Phase
+
+### Budget: $2,000/month ($500/week)
+
+**Strategy:** Double down on winning hooks, expand creative variations.
+
+### Creative Rotation System
+
+They created 3 variations per winning hook:
+
+**Variation A: UGC Creator**
+- Real customer (micro-influencer, 15K followers)
+- Authentic bathroom lighting
+- No makeup, bare skin close-up
+- Script: casual, conversational
+
+**Variation B: Founder Story**
+- Brand founder in casual setting
+- Personal struggle with acne
+- Product discovery narrative
+- Script: emotional, vulnerable
+
+**Variation C: Product Demo**
+- Close-up texture application
+- Before/after (7-day timeline)
+- Ingredient education overlay
+- Script: educational, authoritative
+
+**Performance by Variation:**
+- UGC Creator: 3.1x ROAS (winner)
+- Founder Story: 2.8x ROAS
+- Product Demo: 2.4x ROAS
+
+**Key Learning:** UGC-style content outperformed polished demos. Audiences wanted authenticity over production value.
+
+## Month 5-6: Optimization Phase
+
+### Budget: $5,000/month ($1,250/week)
+
+**Strategy:** Optimize winning creatives, expand targeting, test offers.
+
+### The Offer Tests
+
+1. **Free Shipping over $35** (baseline)
+   - Conversion rate: 1.8%
+   - AOV: $42
+
+2. **10% Off First Order**
+   - Conversion rate: 2.3% (winner)
+   - AOV: $38
+
+3. **Free Gift with Purchase (travel size cleanser)**
+   - Conversion rate: 2.1%
+   - AOV: $45
+
+**Final Offer Choice:** 10% off first order. Higher conversion outweighed slightly lower AOV.
+
+### The Remarketing Campaign
+
+They added a retargeting layer:
+
+**Retargeting Hook:** "Still deciding? Here's why people love GlowRoutine."
+
+- Content: Customer testimonials, before/after gallery
+- Offer: Free shipping reminder
+- Result: 4.2x ROAS (higher than acquisition)
+
+## The Complete Funnel Breakdown
+
+### Top of Funnel (Acquisition)
+- **Ad Spend:** $78,000
+- **Impressions:** 8.2M
+- **Clicks:** 184,000
+- **CTR:** 2.24%
+- **CPC:** $0.42
+- **Landing Page Views:** 156,000
+- **Conversion Rate:** 1.9%
+- **First-Time Purchases:** 2,964
+- **Revenue:** $112,632
+- **ROAS:** 1.44x
+
+### Middle of Funnel (Retargeting)
+- **Ad Spend:** $24,000
+- **Impressions:** 1.8M
+- **Clicks:** 62,000
+- **CTR:** 3.44%
+- **Conversions:** 1,847
+- **Revenue:** $70,186
+- **ROAS:** 2.92x
+
+### Bottom of Funnel (Email/SMS)
+- **Email Revenue:** $146,000 (from 7,284 purchases)
+- **Email ROAS:** 42x (on $3,500 email platform cost)
+- **Total LTV Impact:** 4.8x average customer LTV
+
+## The 3 Hooks That Generated 60% of Sales
+
+### Hook #1: "Don't Buy Retinol Until You Watch This"
+
+**Full Script:**
+> **[0-3s]** Don't buy retinol until you watch this.
+>
+> **[3-12s]** I used retinol for 6 months and my skin got worse. Red, peeling, still breaking out. I was about to give up.
+>
+> **[12-22s]** Then I found this bakuchiol serum. Same results, none of the irritation. And it's only $38.
+>
+> **[22-30s]** 30 days later, my texture is gone. Even my dermatologist was shocked.
+>
+> **[30-35s]** Link in bio. Try it for 30 days, money-back guarantee.
+
+**Performance:** 3.2% CTR, 2.4% conversion rate, 3.1x ROAS
+
+### Hook #2: "Stop Scrolling If You Have Textured Skin"
+
+**Full Script:**
+> **[0-3s]** Stop scrolling if you have textured skin.
+>
+> **[3-10s]** I tried every exfoliant out there. Nothing worked. My skin actually got worse.
+>
+> **[10-20s]** Then I found this vitamin C serum with ferulic acid. Gentle enough for daily use, strong enough to see results.
+>
+> **[20-30s]** Two weeks in, my pores looked smaller. My texture started smoothing out.
+>
+> **[30-35s]** Link in bio. Free shipping over $35.
+
+**Performance:** 2.8% CTR, 2.1% conversion rate, 2.9x ROAS
+
+### Hook #3: "I Tried Everything. Nothing Worked. Then This."
+
+**Full Script:**
+> **[0-3s]** I tried everything. Nothing worked. Then this happened.
+>
+> **[3-12s]** Acne for 12 years. Tried prescriptions, expensive serums, DIY remedies. Nothing lasted.
+>
+> **[12-22s]** Started using this $38 serum morning and night. No harsh ingredients, just science-backed ones.
+>
+> **[22-30s]** 8 weeks later, my skin is the clearest it's been since middle school.
+>
+> **[30-35s]** Link in bio. Use code GLOW10 for 10% off.
+
+**Performance:** 2.4% CTR, 2.4% conversion rate, 3.2x ROAS
+
+## Before & After Metrics
+
+### Before TikTok (Instagram Only)
+- Monthly ad spend: $8,000
+- Monthly orders: 680
+- AOV: $42
+- Monthly revenue: $28,560
+- ROAS: 3.57x
+- CAC: $11.76
+- Customer LTV: $68
+
+### After 6 Months (TikTok + Instagram)
+- Monthly ad spend: $13,000 ($5K TikTok, $8K IG)
+- Monthly orders: 2,847
+- AOV: $41
+- Monthly revenue: $116,727
+- Combined ROAS: 4.48x
+- CAC: $9.12 (down 22%)
+- Customer LTV: $76 (up 12%)
+
+### Growth Breakdown
+- **Total new customers from TikTok:** 4,811
+- **Total revenue from TikTok:** $197,251
+- **TikTok ROAS:** 3.8x
+- **Email/SMS revenue from TikTok customers:** $146,000
+- **Total attributed revenue:** $343,251
+- **Blended ROAS:** 6.6x
+
+## The Creative Production System
+
+### UGC Creator Approach
+Instead of hiring influencers, they built a micro-creator community:
+
+1. **Identified 20 customers** who posted about the brand organically
+2. **Sent free product** with no posting requirement
+3. **Paid $150 per video** for creators they wanted to work with again
+4. **Created content briefs** with loose guidelines (not scripts)
+5. **Tested videos at small spend** before scaling
+
+**Cost per video:** $150 product + $150 fee = $300
+**Videos created in 6 months:** 47
+**Total video production cost:** $14,100
+**Cost per order from these videos:** $2.92
+
+### The Testing Framework
+
+Every new creative followed this process:
+
+1. **Day 1-2:** $50/day spend ($100 total)
+2. **Evaluate:** If CTR > 2% and CPC < $0.50, continue
+3. **Day 3-7:** $100/day spend ($500 total)
+4. **Evaluate:** If ROAS > 2.5x, scale to $200/day
+5. **Day 8-14:** $200/day spend ($1,400 total)
+6. **Final decision:** If ROAS > 3x, add to ongoing rotation
+
+**Kill Criteria:** Stop any ad that doesn't hit 2% CTR by Day 2.
+
+## The Budget Allocation Strategy
+
+### Month 1-2: Discovery
+- TikTok: 100% ($500/month)
+- Test budget: $125/week × 8 weeks = $1,000
+- Goal: Find 3 winning hooks
+
+### Month 3-4: Validation
+- TikTok: 70% ($1,400/month)
+- Instagram: 30% ($600/month)
+- Goal: Validate TikTok can beat Instagram ROAS
+
+### Month 5-6: Scale
+- TikTok: 60% ($3,000/month)
+- Instagram: 30% ($1,500/month)
+- Retargeting: 10% ($500/month)
+- Goal: Maximize profitable scale
+
+## The Landing Page That Converted
+
+They built a dedicated TikTok landing page with:
+
+1. **Mobile-first design** (85% of traffic was mobile)
+2. **Hook continuity** - "Don't buy retinol" ad → landing page emphasized bakuchiol alternative
+3. **Social proof above fold** - "2,847 verified reviews"
+4. **Single CTA** - "Add to Cart" (no navigation distractions)
+5. **Offer clarity** - "10% off your first order with code GLOW10"
+6. **Trust badges** - "30-day money-back guarantee" visible before checkout
+7. **Video integration** - UGC from ads embedded on product page
+
+**Landing Page Conversion Rate:** 2.1% (vs. 1.4% on main product page)
+
+## What Didn't Work (Failures to Avoid)
+
+### Failed Test 1: Expensive Production
+- **Investment:** $3,200 for professional video production
+- **Result:** 1.6% CTR, 1.2x ROAS
+- **Learning:** Polished content performed worse than iPhone-shot UGC
+
+### Failed Test 2: Broad Targeting
+- **Test:** "Women 18-34 interested in skincare"
+- **Result:** High impressions, low engagement (1.1% CTR)
+- **Learning:** Interest targeting was too broad. Let TikTok's algorithm find the audience.
+
+### Failed Test 3: Long-Form Content
+- **Test:** 60-second educational videos about ingredients
+- **Result:** Poor completion rates (average watch time: 8 seconds)
+- **Learning:** TikTok users want quick results. Under 30 seconds is ideal.
+
+### Failed Test 4: Hard Sales CTAs
+- **Test:** "Shop Now - Limited Stock"
+- **Result:** High click-through, low conversion (0.8%)
+- **Learning:** Urgency without authenticity backfires.
+
+## The 6-Month Timeline Summary
+
+| Month | Ad Spend | Orders | Revenue | ROAS | Key Action |
+|-------|----------|--------|---------|------|------------|
+| 1 | $500 | 48 | $1,968 | 3.9x | Testing 15 hooks |
+| 2 | $500 | 62 | $2,542 | 5.1x | Identified 3 winners |
+| 3 | $2,000 | 342 | $14,022 | 7.0x | Created UGC variations |
+| 4 | $2,000 | 521 | $21,361 | 10.7x | Added retargeting |
+| 5 | $5,000 | 1,247 | $51,127 | 10.2x | Tested offers |
+| 6 | $5,000 | 1,811 | $74,251 | 14.9x | Scaled winners |
+| **Total** | **$15,000** | **4,031** | **$165,271** | **11.0x** | - |
+
+**Note:** Email revenue from TikTok customers: $146,000 additional
+**Total attributed revenue:** $311,271
+**Total blended ROAS:** 20.8x
+
+## Key Takeaways You Can Apply
+
+### 1. Start Small, Test Fast
+$125/week is enough to find winners. Don't overspend on unproven creatives.
+
+### 2. Authenticity Beats Production
+UGC-style content outperformed professional videos 3x. Use real people, real settings.
+
+### 3. Hook Everything
+The first 3 seconds determine 80% of performance. Test hooks relentlessly.
+
+### 4. Build a Creator Community
+Micro-creators cost less and perform better than big influencers.
+
+### 5. Optimize the Full Funnel
+Retargeting ROAS (4.2x) beat acquisition ROAS (1.44x). Don't ignore bottom of funnel.
+
+### 6. Mobile-First Everything
+85% of traffic was mobile. If your landing page sucks on mobile, you're losing money.
+
+### 7. Let the Algorithm Find Your Audience
+Interest targeting underperformed. Broad targeting with strong hooks worked better.
+
+## Replicate This Strategy: Your 90-Day Plan
+
+### Days 1-30: Discovery
+- Budget: $500-1,000 total
+- Create 10-15 hook variations
+- Test at $50/day per creative
+- Identify top 3 performers
+
+### Days 31-60: Validation
+- Budget: $1,500-2,000 total
+- Scale top 3 hooks to $200/day each
+- Add retargeting layer
+- Build UGC creator pipeline
+
+### Days 61-90: Optimization
+- Budget: $3,000-5,000 total
+- Test offers (discount vs. free shipping)
+- Optimize landing page
+- Add email/SMS retargeting
+
+## Final Metrics Summary
+
+- **Total Ad Spend:** $15,000
+- **Total Orders:** 4,031
+- **Total Revenue:** $165,271 (direct) + $146,000 (email) = $311,271
+- **Average Order Value:** $41
+- **Customer Acquisition Cost:** $3.72
+- **Customer Lifetime Value:** $76
+- **LTV:CAC Ratio:** 20.4x
+- **Payback Period:** 18 days
+- **Blended ROAS:** 20.8x
+
+---
+
+**Want results like this?** Browse the Adocavo hook library for proven viral hooks and generate custom scripts for your product in seconds.`,
+    publishedAt: "2026-01-10",
+    updatedAt: "2026-01-12",
+    tags: ["case study", "ecommerce", "tiktok ads", "scaling", "skincare"],
+    featuredImage: "/og-default.svg",
+  },
+  {
+    id: "post_012",
+    slug: "case-study-fitness-app-50k-downloads",
+    title: "Case Study: How a Fitness App Got 50K Downloads with TikTok UGC",
+    excerpt:
+      "A fitness app used micro-creators and viral challenges to generate 50,000 downloads in 3 months. Complete strategy breakdown with budget and creatives.",
+    content: `# Case Study: How a Fitness App Got 50K Downloads with TikTok UGC
+
+FitPulse (a fictional home workout app) achieved 50,000 app installs in 90 days using a TikTok UGC strategy that cost less than $0.40 per install. Here's the complete playbook they used.
+
+## The App Snapshot
+
+**FitPulse**
+- Product: Home workout app (no equipment needed)
+- Price: Free with premium subscription ($9.99/month)
+- Target audience: Women 18-29, busy, want quick workouts
+- Previous marketing: Instagram influencers only
+- TikTok starting budget: $1,500/month
+- 90-day result: 50,237 downloads, $0.38 CPI (cost per install)
+
+## The Strategy: Challenge-Based UGC
+
+Instead of traditional app install ads, FitPulse created a viral challenge and used micro-creators to spread it.
+
+### The Challenge: #28DaySweat
+
+**Concept:** 28-day workout challenge with daily 15-minute routines
+**Hashtag:** #28DaySweat
+**Incentive:** Free premium access for anyone who completes and posts all 28 days
+
+## Month 1: Seeding the Challenge
+
+### Budget: $1,500
+
+**Step 1: Recruit 20 Micro-Creators**
+
+Instead of paying influencers, they found:
+
+- **Criteria:** Women 500-5,000 followers, fitness content, high engagement
+- **Offer:** Free premium access + $50 per video (not per post)
+- **Requirement:** 1 video per week for 4 weeks, documenting their 28-day journey
+- **Total creator cost:** 20 creators × 4 videos × $50 = $4,000 (offset by app value)
+
+**Step 2: Create a Content Brief**
+
+Not a script, but guidelines:
+
+1. Show the struggle (day 1-7)
+2. Show progress (day 14)
+3. Show results (day 28)
+4. Use the sound (they commissioned a trending audio clip)
+5. Include: "Join #28DaySweat - link in bio"
+
+**Step 3: Paid Amplification**
+
+Once creators posted, they boosted:
+- Top 5 performing creator videos
+- $200/day per video for 3 days
+- Total boost spend: $3,000
+
+**Month 1 Results:**
+- Total videos: 87 (20 creators + organic users joining)
+- Total video views: 2.3M
+- App downloads: 8,421
+- CPI: $0.53
+- Top performing video: 340K views, 1,247 clicks
+
+## Month 2: The Viral Breakthrough
+
+### Budget: $3,000
+
+**What Happened:**
+
+A creator with 2,000 followers posted her Day 28 transformation. The video went viral.
+
+**The Video:**
+> Hook: "I almost quit on Day 7. Here's my Day 28."
+> Content: Side-by-side before/after, real emotion
+> CTA: "Join #28DaySweat - link in bio"
+> Result: 2.1M views, 47K likes, 2,341 comments
+
+**Response Strategy:**
+
+1. **Doubled down on boost** - $500/day for this video
+2. **Commented with:** "DM us for your Day 1 to join" (captured emails)
+3. **Created response videos** - answered common questions in new content
+4. **Launched affiliate program** - Creators got $2 per download they drove
+
+**Month 2 Results:**
+- Total videos: 342
+- Total video views: 8.7M
+- App downloads: 18,293
+- CPI: $0.31
+- Challenge hashtag views: 12.4M
+- New creators joined: 87 (organic, no payment)
+
+## Month 3: Scaling & Optimization
+
+### Budget: $5,000
+
+**Three Parallel Strategies:**
+
+### Strategy A: Boost Winners
+- Identified top 20 performing videos from Months 1-2
+- Boost spend: $150/day per video
+- Total: $3,000/month
+- Result: 14,237 downloads at $0.21 CPI
+
+### Strategy B: Paid App Install Ads
+- Used best-performing creative as ad creative
+- Targeting: Women 18-29, fitness interests
+- Budget: $1,500/month
+- Result: 5,286 downloads at $0.28 CPI
+
+### Strategy C: Creator Contest
+- Launched "Best Transformation" contest
+- Prize: $1,000 + 1 year premium + featured on app's social
+- Entry: Post #28DaySweat transformation
+- Budget: $500 (promotion only, content was organic)
+- Result: 4,000+ new challenge videos, 4,000 downloads at $0.13 CPI
+
+**Month 3 Results:**
+- Total downloads: 23,531
+- Total spend: $5,000
+- CPI: $0.21
+- Total challenge hashtag views: 42.3M
+
+## The Complete 90-Day Breakdown
+
+| Metric | Month 1 | Month 2 | Month 3 | Total |
+|--------|---------|---------|---------|-------|
+| Ad Spend | $1,500 | $3,000 | $5,000 | $9,500 |
+| Downloads | 8,421 | 18,293 | 23,531 | 50,245 |
+| CPI | $0.53 | $0.31 | $0.21 | $0.19* |
+| Video Views | 2.3M | 8.7M | 31.3M | 42.3M |
+| Challenge Videos | 87 | 342 | 4,342 | 4,771 |
+| Hashtag Views | 2.1M | 12.4M | 42.3M | 56.8M |
+
+*CPI dropped as organic content took over
+
+## The Top 5 Performing Creatives
+
+### Creative #1: "I Almost Quit" (2.1M views, 2,341 installs)
+
+> **Hook:** I almost quit on Day 7. Here's my Day 28.
+>
+> **Content:** Authentic emotional journey. Tears, sweat, real transformation.
+>
+> **Why it worked:** Vulnerability. Real emotion. Not polished.
+
+### Creative #2: "Busy Mom Hack" (1.4M views, 1,892 installs)
+
+> **Hook:** Workout while the baby naps. 15 minutes is all you need.
+>
+> **Content:** Mom in messy living room, baby in background, real chaos.
+>
+> **Why it worked:** Relatable situation. Low barrier to entry.
+
+### Creative #3: "Before You Spend Money" (980K views, 1,247 installs)
+
+> **Hook:** Before you spend $100/month on a gym, try this.
+>
+> **Content:** App demo, free alternative narrative.
+>
+> **Why it worked:** Value proposition. Savings angle.
+
+### Creative #4: "The 15-Minute Truth" (847K views, 1,103 installs)
+
+> **Hook:** You don't need an hour. You need 15 minutes.
+>
+> **Content:** Side-by-side: 60-min gym workout vs. 15-min app workout.
+>
+> **Why it worked:** Time efficiency. Myth-busting.
+
+### Creative #5: "No Equipment Needed" (723K views, 987 installs)
+
+> **Hook:** I built this home gym for $0.
+>
+> **Content:** Bodyweight exercises in small apartment.
+>
+> **Why it worked:** Accessibility. No barriers.
+
+## The App Store Optimization (ASO) Strategy
+
+Getting the download wasn't enough. Conversion was key.
+
+### App Store Listing Changes
+
+**Before:**
+- Icon: Generic dumbbell
+- Screenshots: Polished, feature-focused
+- Description: "The best home workout app"
+
+**After:**
+- Icon: Bold "15" (minutes) with flame
+- Screenshots: UGC-style before/afters from challenge
+- Description: "Join 50,000+ in the #28DaySweat challenge. 15 minutes. No equipment. Real results."
+
+**Result:** App Store conversion rate improved from 18% to 34%
+
+## The Monetization Back-End
+
+50,000 downloads is great. Revenue is better.
+
+**Funnel Breakdown:**
+- Downloads: 50,237
+- Sign-ups (required): 47,224 (94%)
+- Day 7 active: 31,483 (67%)
+- Day 28 active: 18,937 (40%)
+- Premium conversion: 4,722 (10% of active)
+
+**Revenue:**
+- Premium subs: 4,722 × $9.99 = $47,178 (Month 1)
+- Month 2 retention: 85% ($40,101)
+- Month 3 retention: 78% ($36,799)
+- **3-month revenue:** $124,078
+- **CAC vs. LTV:** $0.38 CPI vs. $26.30 LTV (3-month)
+- **LTV:CAC ratio:** 69x
+
+## What Didn't Work
+
+### Failed Test 1: Professional App Demo Video
+- **Investment:** $2,500 for animated explainer
+- **Result:** 124K views, 89 installs, $28.09 CPI
+- **Learning:** Polish doesn't convert on TikTok. Authenticity wins.
+
+### Failed Test 2: "Workout Challenges" (too generic)
+- **Test:** General fitness challenge hashtag
+- **Result:** Lost in noise, no traction
+- **Learning:** Specific, branded challenge (#28DaySweat) performed better
+
+### Failed Test 3: Influencer Whitelisting
+- **Test:** Paid creators to run ads through their accounts
+- **Result:** Higher CAC ($0.72), confusing attribution
+- **Learning:** Boost organic content, don't replicate it
+
+### Failed Test 4: Broad Targeting
+- **Test:** "Fitness enthusiasts 18-44"
+- **Result:** Low conversion rate (0.8%)
+- **Learning:** Narrow targeting (women 18-29) performed 3x better
+
+## The Replicable Framework
+
+### Phase 1: Challenge Design (Days 1-7)
+1. Define a specific, time-bound challenge (28 days)
+2. Create a unique hashtag
+3. Build an incentive structure (premium access, prizes)
+4. Prepare content briefs for creators
+
+### Phase 2: Creator Recruitment (Days 8-21)
+1. Find 20-50 micro-creators (500-5K followers)
+2. Offer fair compensation ($50-100 per video)
+3. Provide guidelines, not scripts
+4. Set clear posting schedule (1-2x per week)
+
+### Phase 3: Seeding & Amplification (Days 22-60)
+1. Boost top-performing creator content
+2. Engage with every challenge post
+3. Create response content for FAQs
+4. Launch affiliate program if organic traction appears
+
+### Phase 4: Scale (Days 61-90)
+1. Double down on winning creatives
+2. Add paid app install ads
+3. Launch contest/giveaway to boost UGC
+4. Optimize app store listing for TikTok traffic
+
+## Key Takeaways
+
+### 1. Challenges Scale Better Than Ads
+The hashtag #28DaySweat generated 56.8M views organically. Paid ads couldn't match that reach at any budget.
+
+### 2. Micro-Creators Outperform Big Influencers
+Creators with 500-5K followers had higher engagement and lower costs than 100K+ accounts.
+
+### 3. Authenticity Is Non-Negotiable
+The "almost quit" video (tears, sweat, real emotion) outperformed polished demos 20x.
+
+### 4. Incentivize Participation
+Free premium access drove 4,771 challenge videos. User-generated content became marketing.
+
+### 5. Optimize the Full Funnel
+App store optimization (changing screenshots to UGC) doubled conversion rate.
+
+### 6. Track LTV, Not Just CPI
+$0.38 CPI is great. $26.30 LTV with 69x ratio is extraordinary.
+
+## Your 30-Day Launch Plan
+
+### Week 1: Design
+- Day 1-3: Define challenge parameters
+- Day 4-5: Create hashtag and assets
+- Day 6-7: Build landing page/challenge hub
+
+### Week 2: Recruit
+- Day 8-10: Find and DM 50-100 micro-creators
+- Day 11-12: Negotiate and onboard 20-30
+- Day 13-14: Send product/access + content briefs
+
+### Week 3: Seed
+- Day 15-17: First wave of creator posts
+- Day 18-19: Begin boost testing ($50/day per video)
+- Day 20-21: Engage with every post, build community
+
+### Week 4: Amplify
+- Day 22-28: Scale top performers to $100-200/day
+- Day 25-28: Launch contest/giveaway
+- Day 28: Evaluate and decide next steps
+
+## Final Metrics Summary
+
+- **Total Ad Spend:** $9,500
+- **Total Downloads:** 50,237
+- **Average CPI:** $0.19 (organic-weighted)
+- **Paid CPI:** $0.38
+- **Total Challenge Videos:** 4,771
+- **Total Hashtag Views:** 56.8M
+- **Premium Conversions:** 4,722 (10% of active users)
+- **3-Month Revenue:** $124,078
+- **3-Month LTV:** $26.30
+- **LTV:CAC Ratio:** 69.2x
+- **Payback Period:** 4 days
+
+---
+
+**Launch your own viral challenge** with hooks from the Adocavo library. Generate scripts that drive downloads, signups, and sales.`,
+    publishedAt: "2026-01-10",
+    updatedAt: "2026-01-12",
+    tags: ["case study", "fitness", "app installs", "ugc", "viral marketing"],
+    featuredImage: "/og-default.svg",
+  },
 ];

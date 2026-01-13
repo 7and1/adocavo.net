@@ -1172,7 +1172,49 @@ Set up external monitoring (e.g., Uptime Robot, Better Uptime):
 
 ---
 
-## 10. Related Documentation
+## 10. Operations & Backups
+
+### 10.1 D1 → R2 Scheduled Backups
+
+We run a dedicated backup worker that dumps the D1 database to R2 on a cron
+schedule. This keeps production data recoverable independently from Cloudflare
+Time Travel.
+
+**Worker entrypoint**: `workers/backup/worker.ts`  
+**Wrangler config**: `wrangler.backup.toml`
+
+**Cron schedule** (default): `0 3 * * *` (daily at 03:00 UTC)  
+**Backup key prefix**: `d1-backups/`  
+**Retention**: `BACKUP_RETENTION_DAYS` (default 30 days)
+
+### 10.2 Manual Backup Trigger
+
+The backup worker exposes a protected manual trigger:
+
+```
+POST /backup
+Header: x-backup-token: $BACKUP_WEBHOOK_TOKEN
+```
+
+### 10.3 Required Bindings
+
+```
+[[d1_databases]]
+binding = "DB"
+
+[[r2_buckets]]
+binding = "R2_BACKUPS"
+```
+
+Set the secret via Wrangler:
+
+```
+wrangler secret put BACKUP_WEBHOOK_TOKEN --config wrangler.backup.toml
+```
+
+---
+
+## 11. Related Documentation
 
 | Document                                                 | Purpose                     |
 | -------------------------------------------------------- | --------------------------- |

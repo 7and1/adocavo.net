@@ -4,6 +4,14 @@ import typography from "@tailwindcss/typography";
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
+    screens: {
+      xs: "480px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
+    },
     container: {
       center: true,
       padding: {
@@ -46,7 +54,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-space)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains)", "monospace"],
       },
       keyframes: {
@@ -76,6 +84,13 @@ const config: Config = {
           },
           "100%": { height: "0", opacity: "0" },
         },
+      },
+      scrollbarHide: {
+        "&::-webkit-scrollbar": {
+          display: "none",
+        },
+        "-ms-overflow-style": "none",
+        "scrollbar-width": "none",
       },
       animation: {
         "fade-in": "fade-in 0.4s ease-out",

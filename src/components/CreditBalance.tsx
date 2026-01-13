@@ -15,7 +15,7 @@ export function CreditBalance() {
   return (
     <div
       className={cn(
-        "flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition-colors",
+        "user-credits flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition-colors",
         isLow
           ? "bg-amber-50 text-amber-700 border border-amber-200"
           : "bg-primary-50 text-primary-700",

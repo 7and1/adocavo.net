@@ -2,11 +2,14 @@ import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { HookGrid } from "@/components/HookGrid";
 import { HookGridSkeleton } from "@/components/skeletons";
-import { FakeDoorAnalyzeUrl } from "@/components/FakeDoorAnalyzeUrl";
 import { SocialProof } from "@/components/SocialProof";
+import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
+import { OnboardingTour } from "@/components/OnboardingTour";
+import { EmailCapture } from "@/components/EmailCapture";
 import { getHooks, getCategories } from "@/lib/services/hooks";
 import { getBindings } from "@/lib/cloudflare";
+import { getSeedHooks, getSeedCategories } from "@/lib/seed-hooks";
 import {
   generateMetadata,
   pageMetadata,
@@ -15,7 +18,6 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 export const metadata: Metadata = generateMetadata(pageMetadata.home);
@@ -24,7 +26,9 @@ async function HooksSection() {
   const env = getBindings();
   const db = env.DB as D1Database | undefined;
   if (!db) {
-    return <HookGrid initialHooks={[]} categories={[]} />;
+    const hooks = getSeedHooks({ limit: 50, page: 1 });
+    const categories = getSeedCategories();
+    return <HookGrid initialHooks={hooks} categories={categories} />;
   }
 
   const [hooks, categories] = await Promise.all([
@@ -45,6 +49,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Header />
+      <OnboardingTour />
       <main id="main-content" className="container mx-auto px-4 py-8">
         <section className="text-center mb-12">
           <div className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm text-gray-500 shadow-sm">
@@ -58,10 +63,27 @@ export default function HomePage() {
             Browse proven ad hooks and generate custom scripts instantly with
             AI. Perfect for e-commerce sellers, marketers, and UGC creators.
           </p>
-          <div className="flex justify-center gap-4">
-            <FakeDoorAnalyzeUrl />
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/auth/signin"
+              prefetch
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary-500 text-white font-medium shadow-sm hover:bg-primary-600 transition-colors"
+            >
+              Get Started Free
+            </Link>
+            <Link
+              href="/pricing"
+              prefetch
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            >
+              View Pricing
+            </Link>
           </div>
         </section>
+
+        <div className="mb-8">
+          <EmailCapture context="browse" />
+        </div>
 
         <Suspense fallback={<HookGridSkeleton />}>
           <HooksSection />
@@ -98,6 +120,8 @@ export default function HomePage() {
           </div>
         </section>
 
+        <Testimonials />
+
         <section className="mt-16">
           <FAQ />
         </section>
@@ -112,6 +136,7 @@ export default function HomePage() {
           </p>
           <Link
             href="/blog"
+            prefetch
             className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
           >
             Learn More About TikTok Ads

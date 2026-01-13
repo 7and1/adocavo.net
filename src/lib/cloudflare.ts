@@ -3,48 +3,46 @@ import { AppError } from "./errors";
 import { createDb, type Database } from "./db";
 
 export interface EnvBindings {
-  DB: D1Database;
-  AI: Ai;
-  NEXTAUTH_SECRET: string;
-  GOOGLE_CLIENT_ID: string;
-  GOOGLE_CLIENT_SECRET: string;
-  GITHUB_CLIENT_ID: string;
-  GITHUB_CLIENT_SECRET: string;
-  NEXTAUTH_URL: string;
+  DB?: D1Database;
+  AI?: Ai;
+  CACHE_KV?: KVNamespace;
+  NEXT_INC_CACHE_KV?: KVNamespace;
+  NEXT_TAG_CACHE_KV?: KVNamespace;
+  NEXTAUTH_SECRET?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  GITHUB_CLIENT_ID?: string;
+  GITHUB_CLIENT_SECRET?: string;
+  NEXTAUTH_URL?: string;
   AI_MODEL_SIZE?: string;
   AI_STREAMING?: string;
+  LOG_DRAIN_URL?: string;
+  LOG_DRAIN_TOKEN?: string;
+  LOG_DRAIN_PROVIDER?: string;
+  LOG_LEVEL?: string;
+  ALERT_WEBHOOK_URL?: string;
+  R2_BACKUPS?: R2Bucket;
 }
 
-function isValidEnvBindings(obj: unknown): obj is EnvBindings {
-  if (typeof obj !== "object" || obj === null) {
-    return false;
-  }
-  const env = obj as Record<string, unknown>;
-  return (
-    "DB" in env &&
-    "AI" in env &&
-    "NEXTAUTH_SECRET" in env &&
-    "GOOGLE_CLIENT_ID" in env &&
-    "GOOGLE_CLIENT_SECRET" in env &&
-    "GITHUB_CLIENT_ID" in env &&
-    "GITHUB_CLIENT_SECRET" in env &&
-    "NEXTAUTH_URL" in env
-  );
-}
-
+/**
+ * Gets environment bindings from Cloudflare context or process.env.
+ * In production Cloudflare Workers, bindings come from wrangler.toml [vars] and secrets.
+ * In development, they come from process.env or Cloudflare context via getPlatformProxy.
+ */
 export function getBindings(): EnvBindings {
   try {
     const context = getOpenNextContext();
-    if (isValidEnvBindings(context.env)) {
-      return context.env;
+    if (context?.env && typeof context.env === "object") {
+      // Merge Cloudflare context with process.env for any missing values
+      return {
+        ...process.env,
+        ...context.env,
+      } as EnvBindings;
     }
   } catch {
     // Continue to process.env fallback
   }
-  if (isValidEnvBindings(process.env)) {
-    return process.env;
-  }
-  // Return partial bindings for build-time scenarios
+  // Return process.env for build-time and fallback scenarios
   return process.env as unknown as EnvBindings;
 }
 
@@ -90,6 +88,14 @@ export function getD1(): D1Database {
  */
 export function getDB(): Database {
   return createDb(getD1());
+}
+
+/**
+ * Get KV namespace for caching
+ */
+export function getKV(): KVNamespace | null {
+  const env = getBindings();
+  return env.CACHE_KV || env.NEXT_INC_CACHE_KV || null;
 }
 
 export async function getCloudflareContext() {
