@@ -5,18 +5,8 @@
 -- 1. ADD MISSING CHECK CONSTRAINTS
 -- ============================================================================
 
--- Users table constraints
-ALTER TABLE users ADD CHECK (credits >= 0);
-ALTER TABLE users ADD CHECK (role IN ('user', 'pro', 'admin'));
-
--- Script ratings constraint
-ALTER TABLE script_ratings ADD CHECK (rating BETWEEN 1 AND 5);
-
--- Hook review queue constraint
-ALTER TABLE hook_review_queue ADD CHECK (status IN ('pending', 'approved', 'rejected'));
-
--- Rate limits time constraint
-ALTER TABLE rate_limits ADD CHECK (reset_at > updated_at);
+-- NOTE: Cloudflare D1 (SQLite) does not support ALTER TABLE ... ADD CHECK.
+-- Constraint additions are handled in later migrations that recreate tables where needed.
 
 -- ============================================================================
 -- 2. ADD COMPOSITE INDEXES FOR PERFORMANCE
