@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScriptForm } from "@/components/ScriptForm";
@@ -19,11 +18,14 @@ import type { RemixTone } from "@/lib/validations";
 
 export interface ScriptGeneratorProps {
   hook: Hook;
+  allowAnonymous?: boolean;
 }
 
-export function ScriptGenerator({ hook }: ScriptGeneratorProps) {
+export function ScriptGenerator({
+  hook,
+  allowAnonymous = false,
+}: ScriptGeneratorProps) {
   const { data: session } = useSession();
-  const router = useRouter();
 
   const [productDescription, setProductDescription] = useState("");
   const [remixTone, setRemixTone] = useState<RemixTone>("default");
@@ -45,6 +47,7 @@ export function ScriptGenerator({ hook }: ScriptGeneratorProps) {
     setError,
   } = useScriptGeneration({
     hookId: hook.id,
+    allowAnonymous,
     onSuccess: () => {
       setJustGenerated(true);
     },
@@ -77,11 +80,6 @@ export function ScriptGenerator({ hook }: ScriptGeneratorProps) {
     productDescription.length >= 20 && productDescription.length <= 500;
 
   const handleGenerate = useCallback(async () => {
-    if (!session) {
-      router.push(`/auth/signin?callbackUrl=/remix/${hook.id}`);
-      return;
-    }
-
     if (!isValid) return;
 
     await generate(
@@ -90,9 +88,6 @@ export function ScriptGenerator({ hook }: ScriptGeneratorProps) {
       remixInstruction.trim() || undefined,
     );
   }, [
-    session,
-    router,
-    hook.id,
     productDescription,
     remixTone,
     remixInstruction,
@@ -122,6 +117,8 @@ export function ScriptGenerator({ hook }: ScriptGeneratorProps) {
     },
     [generationId, setError],
   );
+
+  const canInteract = !!session?.user?.id;
 
   return (
     <div className="space-y-8 script-generator">
@@ -179,11 +176,11 @@ export function ScriptGenerator({ hook }: ScriptGeneratorProps) {
         <GeneratedResults
           scripts={scripts}
           generationId={generationId}
-          favoriteIds={favoriteIds}
-          ratings={ratings}
-          onToggleFavorite={handleToggleFavorite}
-          onRegenerate={regenerate}
-          onRate={handleRate}
+          favoriteIds={canInteract ? favoriteIds : undefined}
+          ratings={canInteract ? ratings : undefined}
+          onToggleFavorite={canInteract ? handleToggleFavorite : undefined}
+          onRegenerate={canInteract ? regenerate : undefined}
+          onRate={canInteract ? handleRate : undefined}
           shouldScroll={justGenerated}
         />
       )}

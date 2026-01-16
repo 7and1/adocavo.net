@@ -4,9 +4,8 @@ import { auth } from "@/lib/auth";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
 import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
-import { generateScripts } from "@/lib/services/generation";
+import { generateScripts, generateGuestScripts } from "@/lib/services/generation";
 import {
-  AuthRequiredError,
   RateLimitError,
   CreditsError,
   NotFoundError,
@@ -31,6 +30,7 @@ vi.mock("@/lib/rate-limit", () => ({
 
 vi.mock("@/lib/services/generation", () => ({
   generateScripts: vi.fn(),
+  generateGuestScripts: vi.fn(),
 }));
 
 vi.mock("@/lib/api-utils", async () => {
@@ -81,11 +81,21 @@ describe("API: POST /api/generate", () => {
       creditsRemaining: 9,
       generationId: "gen-1",
     });
+    vi.mocked(generateGuestScripts).mockResolvedValue({
+      success: true,
+      scripts: [],
+      creditsRemaining: 0,
+      generationId: "guest-gen-1",
+    });
   });
 
   describe("authentication", () => {
-    it("should return 401 when no session exists", async () => {
+    it("should allow guest generation when no session exists", async () => {
       vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(getRateLimitContext).mockResolvedValue({
+        identifier: { type: "device", value: "device-1" },
+        tier: "anon",
+      });
 
       const request = new Request("https://adocavo.net/api/generate", {
         method: "POST",
@@ -98,13 +108,20 @@ describe("API: POST /api/generate", () => {
       const response = await POST(request);
       const body = await response.json();
 
-      expect(response.status).toBe(401);
-      expect(body.success).toBe(false);
-      expect(body.error.code).toBe("AUTH_REQUIRED");
+      expect(response.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(generateGuestScripts).toHaveBeenCalledWith(mockEnv.AI, mockEnv.DB, {
+        hookId: "hook-1",
+        productDescription: "A valid product description that is long enough",
+      });
     });
 
-    it("should return 401 when session exists but no user", async () => {
+    it("should allow guest generation when session exists but no user", async () => {
       vi.mocked(auth).mockResolvedValue({ user: null } as any);
+      vi.mocked(getRateLimitContext).mockResolvedValue({
+        identifier: { type: "device", value: "device-2" },
+        tier: "anon",
+      });
 
       const request = new Request("https://adocavo.net/api/generate", {
         method: "POST",
@@ -115,8 +132,14 @@ describe("API: POST /api/generate", () => {
       });
 
       const response = await POST(request);
+      const body = await response.json();
 
-      expect(response.status).toBe(401);
+      expect(response.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(generateGuestScripts).toHaveBeenCalledWith(mockEnv.AI, mockEnv.DB, {
+        hookId: "hook-1",
+        productDescription: "A valid product description that is long enough",
+      });
     });
   });
 
@@ -222,6 +245,31 @@ describe("API: POST /api/generate", () => {
         { type: "user", value: "user-1" },
         "generate",
         "free",
+      );
+    });
+
+    it("should check rate limit for guest sessions", async () => {
+      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(getRateLimitContext).mockResolvedValue({
+        identifier: { type: "device", value: "device-3" },
+        tier: "anon",
+      });
+
+      const request = new Request("https://adocavo.net/api/generate", {
+        method: "POST",
+        body: JSON.stringify({
+          hookId: "hook-1",
+          productDescription: "A valid product description that is long enough",
+        }),
+      });
+
+      await POST(request);
+
+      expect(checkRateLimit).toHaveBeenCalledWith(
+        mockDb,
+        { type: "device", value: "device-3" },
+        "generateGuest",
+        "anon",
       );
     });
   });

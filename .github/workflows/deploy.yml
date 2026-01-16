@@ -27,6 +27,7 @@ jobs:
             "CLOUDFLARE_API_TOKEN"
             "CLOUDFLARE_ACCOUNT_ID"
             "CLOUDFLARE_D1_DATABASE_ID"
+            "CLOUDFLARE_D1_DATABASE_PREVIEW_ID"
             "NEXTAUTH_SECRET"
             "NEXT_INC_CACHE_KV_ID"
             "NEXT_TAG_CACHE_KV_ID"
@@ -52,6 +53,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          CLOUDFLARE_D1_DATABASE_PREVIEW_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_PREVIEW_ID }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           NEXT_INC_CACHE_KV_ID: ${{ secrets.NEXT_INC_CACHE_KV_ID }}
           NEXT_TAG_CACHE_KV_ID: ${{ secrets.NEXT_TAG_CACHE_KV_ID }}
@@ -135,7 +137,7 @@ jobs:
           [[d1_databases]]
           binding = "DB"
           database_name = "adocavo-db-preview"
-          database_id = "${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}"
+          database_id = "${{ secrets.CLOUDFLARE_D1_DATABASE_PREVIEW_ID }}"
           migrations_dir = "drizzle/migrations"
 
           [ai]

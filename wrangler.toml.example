@@ -33,7 +33,7 @@ name = "adocavo-net"
 main = ".open-next/worker.js"
 compatibility_date = "2026-01-09"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
-# account_id = "YOUR_ACCOUNT_ID_HERE" # Optional: Set to avoid --account-id flag
+# account_id is intentionally omitted. Set CLOUDFLARE_ACCOUNT_ID in your environment instead.
 
 # Assets binding for OpenNext
 [assets]
@@ -168,4 +168,3 @@ LOG_DRAIN_PROVIDER = "generic"
 # - Tail logs: wrangler tail
 # - Tail preview logs: wrangler tail --env preview
 # ============================================================================
-

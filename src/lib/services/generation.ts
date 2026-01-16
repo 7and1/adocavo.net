@@ -77,6 +77,93 @@ function validateScriptsArray(scripts: unknown): scripts is Script[] {
   return true;
 }
 
+async function callAiForScripts(
+  ai: Ai,
+  hook: string,
+  productDescription: string,
+  remixInstruction?: string,
+  remixTone?: string,
+): Promise<
+  | { success: true; scripts: Script[] }
+  | { success: false; error: GenerationErrorCode; message: string }
+> {
+  try {
+    // Wrap AI call with timeout and circuit breaker protection
+    const response = await withAiProtection(
+      async () =>
+        ai.run(AI_CONFIG.model, {
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            {
+              role: "user",
+              content: buildUserPrompt(
+                hook,
+                productDescription,
+                remixInstruction,
+                remixTone,
+              ),
+            },
+          ],
+          temperature: AI_CONFIG.temperature,
+          max_tokens: AI_CONFIG.max_tokens,
+        }),
+      30000, // 30 second timeout for AI calls
+    );
+
+    const content = response.response || "";
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+
+    if (!jsonMatch) {
+      return {
+        success: false,
+        error: "INVALID_AI_RESPONSE",
+        message: "Failed to parse AI response",
+      };
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]) as { scripts?: Script[] };
+
+    // Double validation: both structure and content safety
+    const validation = validateScriptOutput(parsed);
+    if (!validation.valid) {
+      logError("AI output validation failed", new Error(validation.error), {
+        hook,
+        productDescription,
+      });
+      return {
+        success: false,
+        error: "INVALID_AI_RESPONSE",
+        message: validation.error || "Invalid AI output",
+      };
+    }
+
+    if (!parsed.scripts || !Array.isArray(parsed.scripts)) {
+      return {
+        success: false,
+        error: "INVALID_AI_RESPONSE",
+        message: "Scripts missing in AI response",
+      };
+    }
+
+    if (!validateScriptsArray(parsed.scripts)) {
+      return {
+        success: false,
+        error: "INVALID_AI_RESPONSE",
+        message: "Invalid script structure or content",
+      };
+    }
+
+    return { success: true, scripts: parsed.scripts };
+  } catch (error) {
+    logError("AI error", error, { hook, productDescription });
+    return {
+      success: false,
+      error: "AI_UNAVAILABLE",
+      message: "AI service unavailable",
+    };
+  }
+}
+
 export interface GenerationInput {
   userId: string;
   hookId: string;
@@ -252,81 +339,13 @@ export class GenerationService {
     | { success: true; scripts: Script[] }
     | { success: false; error: GenerationErrorCode; message: string }
   > {
-    try {
-      // Wrap AI call with timeout and circuit breaker protection
-      const response = await withAiProtection(
-        async () =>
-          this.ai.run(AI_CONFIG.model, {
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              {
-                role: "user",
-                content: buildUserPrompt(
-                  hook,
-                  productDescription,
-                  remixInstruction,
-                  remixTone,
-                ),
-              },
-            ],
-            temperature: AI_CONFIG.temperature,
-            max_tokens: AI_CONFIG.max_tokens,
-          }),
-        30000, // 30 second timeout for AI calls
-      );
-
-      const content = response.response || "";
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-
-      if (!jsonMatch) {
-        return {
-          success: false,
-          error: "INVALID_AI_RESPONSE",
-          message: "Failed to parse AI response",
-        };
-      }
-
-      const parsed = JSON.parse(jsonMatch[0]) as { scripts?: Script[] };
-
-      // Double validation: both structure and content safety
-      const validation = validateScriptOutput(parsed);
-      if (!validation.valid) {
-        logError("AI output validation failed", new Error(validation.error), {
-          hook,
-          productDescription,
-        });
-        return {
-          success: false,
-          error: "INVALID_AI_RESPONSE",
-          message: validation.error || "Invalid AI output",
-        };
-      }
-
-      if (!parsed.scripts || !Array.isArray(parsed.scripts)) {
-        return {
-          success: false,
-          error: "INVALID_AI_RESPONSE",
-          message: "Scripts missing in AI response",
-        };
-      }
-
-      if (!validateScriptsArray(parsed.scripts)) {
-        return {
-          success: false,
-          error: "INVALID_AI_RESPONSE",
-          message: "Invalid script structure or content",
-        };
-      }
-
-      return { success: true, scripts: parsed.scripts };
-    } catch (error) {
-      logError("AI error", error, { hook, productDescription });
-      return {
-        success: false,
-        error: "AI_UNAVAILABLE",
-        message: "AI service unavailable",
-      };
-    }
+    return callAiForScripts(
+      this.ai,
+      hook,
+      productDescription,
+      remixInstruction,
+      remixTone,
+    );
   }
 }
 
@@ -338,4 +357,54 @@ export async function generateScripts(
   const db = createDb(d1);
   const service = new GenerationService(ai, db);
   return service.generate(input);
+}
+
+export async function generateGuestScripts(
+  ai: Ai,
+  d1: D1Database,
+  input: Omit<GenerationInput, "userId">,
+): Promise<GenerationResult> {
+  const db = createDb(d1);
+  const { hookId, productDescription, remixInstruction, remixTone } = input;
+
+  try {
+    const hook = await withDbQuery("fetch_hook", () =>
+      db.query.hooks.findFirst({
+        where: eq(hooks.id, hookId),
+      }),
+    );
+
+    if (!hook || !hook.isActive) {
+      return {
+        success: false,
+        error: "HOOK_NOT_FOUND",
+        message: `Hook ${hookId} not found or inactive`,
+      };
+    }
+
+    const aiResult = await callAiForScripts(
+      ai,
+      hook.text,
+      productDescription,
+      remixInstruction,
+      remixTone,
+    );
+    if (!aiResult.success) {
+      return aiResult;
+    }
+
+    return {
+      success: true,
+      scripts: aiResult.scripts,
+      creditsRemaining: 0,
+      generationId: nanoid(),
+    };
+  } catch (error) {
+    logError("Guest generation failed", error, { hookId });
+    return {
+      success: false,
+      error: "DATABASE_ERROR",
+      message: "Failed to complete generation",
+    };
+  }
 }

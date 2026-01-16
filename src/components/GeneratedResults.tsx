@@ -6,12 +6,12 @@ import type { Script } from "@/hooks/useScriptGeneration";
 
 export interface GeneratedResultsProps {
   scripts: Script[];
-  generationId: string | null;
-  favoriteIds: Set<string>;
-  ratings: Record<number, number>;
-  onToggleFavorite: () => void;
-  onRegenerate: (angle: string) => Promise<void>;
-  onRate: (scriptIndex: number, rating: number) => void;
+  generationId?: string | null;
+  favoriteIds?: Set<string>;
+  ratings?: Record<number, number>;
+  onToggleFavorite?: () => void;
+  onRegenerate?: (angle: string) => Promise<void>;
+  onRate?: (scriptIndex: number, rating: number) => void;
   shouldScroll?: boolean;
 }
 
@@ -25,6 +25,8 @@ export function GeneratedResults({
   onRate,
   shouldScroll = false,
 }: GeneratedResultsProps) {
+  const safeFavorites = favoriteIds ?? new Set<string>();
+  const safeRatings = ratings ?? {};
   // Scroll to scripts when generated
   useEffect(() => {
     if (shouldScroll) {
@@ -54,10 +56,10 @@ export function GeneratedResults({
             index={index}
             generationId={generationId ?? undefined}
             onRegenerate={onRegenerate}
-            isFavorite={generationId ? favoriteIds.has(generationId) : false}
+            isFavorite={generationId ? safeFavorites.has(generationId) : false}
             onToggleFavorite={onToggleFavorite}
-            onRate={(rating) => onRate(index, rating)}
-            rating={ratings[index]}
+            onRate={onRate ? (rating) => onRate(index, rating) : undefined}
+            rating={safeRatings[index]}
           />
         ))}
       </div>

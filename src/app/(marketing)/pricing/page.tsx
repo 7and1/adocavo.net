@@ -22,7 +22,7 @@ const pricingTiers: PricingTier[] = [
     name: "Anonymous",
     subtitle: "Quick access without any setup",
     price: "$0 /month",
-    description: "10 credits/day rate limit",
+    description: "3 generations/day rate limit",
     features: [
       "Access to 50+ proven hooks",
       "Basic script generation",
@@ -73,12 +73,12 @@ const faqs = [
   {
     question: "What is a credit?",
     answer:
-      "One credit equals one script generation (3 variations). So 10 credits = 30 script variations. Credits reset daily at midnight UTC.",
+      "One credit equals one script generation (3 variations). Guests get 3 per day, and free accounts get 50 per day. Credits reset daily at midnight UTC.",
   },
   {
     question: "Why should I sign up?",
     answer:
-      "Signing up with GitHub gives you 5x more daily credits (50 vs 10), plus a personal dashboard to save your favorite hooks and track your generation history.",
+      "Signing up with GitHub gives you more daily credits (50 vs 3), plus a personal dashboard to save your favorite hooks and track your generation history.",
   },
   {
     question: "Do I need a credit card?",
@@ -103,7 +103,7 @@ export default function PricingPage() {
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
-            Start free with 10 generations per day. Sign in with GitHub to
+            Start free with 3 guest generations per day. Sign in with GitHub to
             unlock 50 generations per day, a dashboard, and usage tracking.
           </p>
           <p className="text-gray-500">No credit card required.</p>

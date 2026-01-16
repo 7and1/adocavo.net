@@ -2,7 +2,7 @@ name = "adocavo-db-backup"
 main = "workers/backup/worker.ts"
 compatibility_date = "2026-01-09"
 compatibility_flags = ["nodejs_compat"]
-account_id = "873cd683fb162639ab3732a3a995b64b"
+# account_id intentionally omitted; set CLOUDFLARE_ACCOUNT_ID in your environment
 
 [[d1_databases]]
 binding = "DB"

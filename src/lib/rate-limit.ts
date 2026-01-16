@@ -11,6 +11,12 @@ const getRateLimitConfig = () => ({
     proRequests: Number(process.env.RATE_LIMIT_GENERATE_PRO_REQUESTS) || 30,
     window: Number(process.env.RATE_LIMIT_GENERATE_WINDOW) || 60,
   },
+  generateGuest: {
+    requests: Number(process.env.RATE_LIMIT_GENERATE_GUEST_REQUESTS) || 3,
+    anonRequests: Number(process.env.RATE_LIMIT_GENERATE_GUEST_ANON_REQUESTS) || 3,
+    proRequests: Number(process.env.RATE_LIMIT_GENERATE_GUEST_PRO_REQUESTS) || 3,
+    window: Number(process.env.RATE_LIMIT_GENERATE_GUEST_WINDOW) || 86400,
+  },
   waitlist: {
     requests: Number(process.env.RATE_LIMIT_WAITLIST_REQUESTS) || 5,
     anonRequests: Number(process.env.RATE_LIMIT_WAITLIST_ANON_REQUESTS) || 3,

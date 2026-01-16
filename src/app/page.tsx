@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Header } from "@/components/Header";
+import { HomepageGenerator } from "@/components/HomepageGenerator";
 import { HookGrid } from "@/components/HookGrid";
 import { HookGridSkeleton } from "@/components/skeletons";
 import { SocialProof } from "@/components/SocialProof";
@@ -39,6 +40,27 @@ async function HooksSection() {
   return <HookGrid initialHooks={hooks} categories={categories} />;
 }
 
+async function GeneratorSection() {
+  const env = getBindings();
+  const db = env.DB as D1Database | undefined;
+  const hooks = db
+    ? await getHooks(db, { limit: 50 })
+    : getSeedHooks({ limit: 50, page: 1 });
+
+  return <HomepageGenerator hooks={hooks} />;
+}
+
+function GeneratorSkeleton() {
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="h-4 w-24 bg-gray-100 rounded mb-2 animate-pulse" />
+      <div className="h-5 w-48 bg-gray-100 rounded mb-6 animate-pulse" />
+      <div className="h-10 w-full bg-gray-100 rounded mb-4 animate-pulse" />
+      <div className="h-28 w-full bg-gray-100 rounded animate-pulse" />
+    </div>
+  );
+}
+
 export default function HomePage() {
   const jsonLd = getWebApplicationJsonLd();
 
@@ -51,33 +73,43 @@ export default function HomePage() {
       <Header />
       <OnboardingTour />
       <main id="main-content" className="container mx-auto px-4 py-8">
-        <section className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm text-gray-500 shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-primary-500" />
-            50+ verified hook patterns
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 mt-6">
-            Viral TikTok Hooks Library
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
-            Browse proven ad hooks and generate custom scripts instantly with
-            AI. Perfect for e-commerce sellers, marketers, and UGC creators.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/auth/signin"
-              prefetch
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary-500 text-white font-medium shadow-sm hover:bg-primary-600 transition-colors"
-            >
-              Get Started Free
-            </Link>
-            <Link
-              href="/pricing"
-              prefetch
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
-              View Pricing
-            </Link>
+        <section className="mb-12">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm text-gray-500 shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-primary-500" />
+                50+ verified hook patterns
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 mt-6">
+                Viral TikTok Hooks Library
+              </h1>
+              <p className="text-xl text-gray-600 max-w-2xl lg:max-w-none mx-auto lg:mx-0 mb-6">
+                Browse proven ad hooks and generate custom scripts instantly
+                with AI. Perfect for e-commerce sellers, marketers, and UGC
+                creators.
+              </p>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+                <Link
+                  href="#browse"
+                  prefetch
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary-500 text-white font-medium shadow-sm hover:bg-primary-600 transition-colors"
+                >
+                  Browse Hooks · No Sign Up
+                </Link>
+                <Link
+                  href="/pricing"
+                  prefetch
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                >
+                  View Pricing
+                </Link>
+              </div>
+            </div>
+            <div className="lg:pl-4">
+              <Suspense fallback={<GeneratorSkeleton />}>
+                <GeneratorSection />
+              </Suspense>
+            </div>
           </div>
         </section>
 

@@ -111,7 +111,7 @@ export function HookGrid({ initialHooks, categories }: HookGridProps) {
   }, [session, loadFavorites]);
 
   return (
-    <div className="space-y-6 hook-grid-section">
+    <div id="browse" className="space-y-6 hook-grid-section">
       <div className="category-filters">
         <HookFilters
           categories={categories}
