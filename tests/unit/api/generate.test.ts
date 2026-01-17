@@ -4,12 +4,11 @@ import { auth } from "@/lib/auth";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
 import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
-import { generateScripts, generateGuestScripts } from "@/lib/services/generation";
 import {
-  RateLimitError,
-  CreditsError,
-  NotFoundError,
-} from "@/lib/errors";
+  generateScripts,
+  generateGuestScripts,
+} from "@/lib/services/generation";
+import { RateLimitError, CreditsError, NotFoundError } from "@/lib/errors";
 
 vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
@@ -110,10 +109,14 @@ describe("API: POST /api/generate", () => {
 
       expect(response.status).toBe(200);
       expect(body.success).toBe(true);
-      expect(generateGuestScripts).toHaveBeenCalledWith(mockEnv.AI, mockEnv.DB, {
-        hookId: "hook-1",
-        productDescription: "A valid product description that is long enough",
-      });
+      expect(generateGuestScripts).toHaveBeenCalledWith(
+        mockEnv.AI,
+        mockEnv.DB,
+        {
+          hookId: "hook-1",
+          productDescription: "A valid product description that is long enough",
+        },
+      );
     });
 
     it("should allow guest generation when session exists but no user", async () => {
@@ -136,10 +139,14 @@ describe("API: POST /api/generate", () => {
 
       expect(response.status).toBe(200);
       expect(body.success).toBe(true);
-      expect(generateGuestScripts).toHaveBeenCalledWith(mockEnv.AI, mockEnv.DB, {
-        hookId: "hook-1",
-        productDescription: "A valid product description that is long enough",
-      });
+      expect(generateGuestScripts).toHaveBeenCalledWith(
+        mockEnv.AI,
+        mockEnv.DB,
+        {
+          hookId: "hook-1",
+          productDescription: "A valid product description that is long enough",
+        },
+      );
     });
   });
 

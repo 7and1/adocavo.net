@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { safeJsonLdStringify } from "@/lib/seo";
 
 interface BreadcrumbItem {
   name: string;
@@ -60,7 +61,7 @@ export function BreadcrumbJsonLd({ items }: BreadcrumbJsonLdProps) {
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(breadcrumbData),
+        __html: safeJsonLdStringify(breadcrumbData),
       }}
     />
   );

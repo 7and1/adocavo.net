@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import { Analytics } from "@/components/Analytics";
+import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 import { getOrganizationJsonLd } from "@/lib/enhanced-seo";
+import { safeJsonLdStringify } from "@/lib/seo";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -97,13 +99,14 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationJsonLd),
+            __html: safeJsonLdStringify(organizationJsonLd),
           }}
         />
       </head>
       <body className="min-h-screen bg-white font-sans antialiased">
         <Providers>{children}</Providers>
         <Analytics />
+        <PerformanceMonitor />
       </body>
     </html>
   );

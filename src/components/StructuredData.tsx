@@ -1,3 +1,4 @@
+import { safeJsonLdStringify } from "@/lib/seo";
 import type { BlogPostWithMeta } from "@/lib/blog";
 
 export function BlogPostSchema({ post }: { post: BlogPostWithMeta }) {
@@ -29,7 +30,7 @@ export function BlogPostSchema({ post }: { post: BlogPostWithMeta }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(data) }}
     />
   );
 }

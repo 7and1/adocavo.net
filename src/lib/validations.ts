@@ -298,6 +298,24 @@ export type RatingRequest = z.infer<typeof ratingRequestSchema>;
 export type FavoriteRequest = z.infer<typeof favoriteRequestSchema>;
 export type RegenerateRequest = z.infer<typeof regenerateRequestSchema>;
 export type AnalyzeRequest = z.infer<typeof analyzeRequestSchema>;
+
+export const analyzeProductRequestSchema = z.object({
+  url: z
+    .string()
+    .url()
+    .max(500, "URL is too long")
+    .refine((value) => {
+      try {
+        const url = new URL(value);
+        return ["http:", "https:"].includes(url.protocol);
+      } catch {
+        return false;
+      }
+    }, "Must be a valid HTTP/HTTPS URL"),
+});
+
+export type AnalyzeProductRequest = z.infer<typeof analyzeProductRequestSchema>;
+
 export type AdminHooksQuery = z.infer<typeof adminHooksQuerySchema>;
 export type HookReviewStatus = z.infer<typeof hookReviewStatusSchema>;
 export type ReviewQueueQuery = z.infer<typeof reviewQueueQuerySchema>;

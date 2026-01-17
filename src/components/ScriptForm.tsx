@@ -1,8 +1,17 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Link2,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/client-api";
 
 export interface ScriptFormProps {
   value: string;
@@ -23,6 +32,11 @@ export function ScriptForm({
 }: ScriptFormProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [touched, setTouched] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
 
   const charCount = value.length;
   const isValid = charCount >= minLength && charCount <= maxLength;
@@ -63,8 +77,45 @@ export function ScriptForm({
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       onChange(e.target.value);
+      setFetchError(null);
     },
     [onChange],
+  );
+
+  const handleFetchFromUrl = useCallback(async () => {
+    if (!urlInput.trim()) return;
+
+    setIsFetching(true);
+    setFetchError(null);
+    setAiAnalysis(null);
+
+    try {
+      const result = await api.analyzeProductUrl(urlInput.trim());
+      onChange(result.formatted);
+      if (result.aiAnalysis) {
+        setAiAnalysis(result.aiAnalysis);
+      }
+      setUrlInput("");
+      setShowUrlInput(false);
+    } catch (err) {
+      if (err instanceof Error) {
+        setFetchError(err.message);
+      } else {
+        setFetchError("Failed to fetch product information");
+      }
+    } finally {
+      setIsFetching(false);
+    }
+  }, [urlInput, onChange]);
+
+  const handleUrlKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && !isFetching) {
+        e.preventDefault();
+        handleFetchFromUrl();
+      }
+    },
+    [isFetching, handleFetchFromUrl],
   );
 
   return (
@@ -88,6 +139,87 @@ export function ScriptForm({
           </span>
         </div>
       </div>
+
+      {showUrlInput ? (
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <Input
+              type="url"
+              placeholder="Paste product URL (TikTok, Amazon, Shopify, or any website)"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              onKeyDown={handleUrlKeyDown}
+              disabled={isFetching || disabled}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              onClick={handleFetchFromUrl}
+              disabled={!urlInput.trim() || isFetching || disabled}
+              variant="default"
+              size="default"
+              className="gap-2"
+            >
+              {isFetching ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Fetching...
+                </>
+              ) : (
+                <>
+                  <Link2 className="h-4 w-4" />
+                  Fetch
+                </>
+              )}
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setShowUrlInput(false);
+                setUrlInput("");
+                setFetchError(null);
+              }}
+              className="text-sm text-gray-500 hover:text-gray-700 underline"
+              disabled={disabled}
+            >
+              Cancel
+            </button>
+            <span className="text-xs text-gray-400">
+              Supports TikTok, Amazon, Shopify stores, and generic websites
+            </span>
+          </div>
+          {fetchError && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <p className="text-sm">{fetchError}</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowUrlInput(true)}
+          className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
+          disabled={disabled}
+        >
+          <Link2 className="h-4 w-4" />
+          Import from URL (TikTok, Amazon, etc.)
+        </button>
+      )}
+
+      {aiAnalysis && (
+        <div className="flex gap-2 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200">
+          <Sparkles className="h-4 w-4 text-purple-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-purple-700 mb-1">
+              AI-Generated Selling Points:
+            </p>
+            <p className="text-sm text-gray-700">{aiAnalysis}</p>
+          </div>
+        </div>
+      )}
 
       <div className="relative">
         <Textarea

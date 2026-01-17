@@ -12,3 +12,5 @@ wrangler.toml.local
 
 # Security: exclude actual wrangler.toml (contains account_id)
 wrangler.toml
+
+# Run npm run extract:blog after blog content changes

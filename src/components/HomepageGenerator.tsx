@@ -23,8 +23,9 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
   const initialHookId = hooks[0]?.id ?? "";
   const [selectedHookId, setSelectedHookId] = useState(initialHookId);
 
+  // Properly handle empty hooks array - selectedHook will be undefined if hooks is empty
   const selectedHook = useMemo(
-    () => hooks.find((hook) => hook.id === selectedHookId) ?? hooks[0],
+    () => hooks.find((hook) => hook.id === selectedHookId),
     [hooks, selectedHookId],
   );
 
@@ -38,6 +39,30 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
   const creditsLabel =
     session?.user?.credits != null ? `${session.user.credits} credits` : null;
 
+  // Handle empty hooks array with friendly UI
+  if (hooks.length === 0) {
+    return (
+      <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm text-center">
+        <div className="max-w-md mx-auto">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+            No hooks available
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            We&apos;re unable to load hooks at the moment. Please refresh the
+            page or try again later.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+            aria-label="Refresh page to load hooks"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!selectedHook) {
     return (
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -45,7 +70,7 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
           Generate scripts instantly
         </h2>
         <p className="mt-2 text-sm text-gray-600">
-          Hooks are loading. Please refresh in a moment.
+          Initializing hook selection...
         </p>
       </div>
     );
@@ -63,7 +88,9 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
           </h2>
         </div>
         <span className="text-xs font-medium text-gray-500">
-          {isGuest ? "3 generations/day" : creditsLabel ?? "Credits available"}
+          {isGuest
+            ? "3 generations/day"
+            : (creditsLabel ?? "Credits available")}
         </span>
       </div>
 
@@ -110,7 +137,12 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
       </div>
 
       <div className="mt-6">
-        <ScriptGenerator hook={selectedHook} allowAnonymous key={selectedHook.id} />
+        {/* selectedHook is guaranteed to be defined here due to early return above */}
+        <ScriptGenerator
+          hook={selectedHook!}
+          allowAnonymous
+          key={selectedHook!.id}
+        />
       </div>
     </div>
   );

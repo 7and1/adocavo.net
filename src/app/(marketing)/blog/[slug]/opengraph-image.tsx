@@ -14,7 +14,7 @@ export default async function OpengraphImage({ params }: Props) {
   let subtitle = "TikTok ad scripts, hook strategies, and creative testing.";
 
   try {
-    const post = getPostBySlug(slug);
+    const post = await getPostBySlug(slug);
     title = post.title;
     subtitle = post.excerpt;
   } catch {

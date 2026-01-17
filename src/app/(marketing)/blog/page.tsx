@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { getAllBlogPosts } from "@/lib/blog";
 import { BlogCard } from "@/components/BlogCard";
-import { generateMetadata, pageMetadata } from "@/lib/seo";
-import { getFAQJsonLd } from "@/lib/seo";
+import {
+  generateMetadata,
+  pageMetadata,
+  getFAQJsonLd,
+  safeJsonLdStringify,
+} from "@/lib/seo";
 
 export const metadata: Metadata = generateMetadata(pageMetadata.blogIndex);
 
@@ -10,6 +14,10 @@ export default function BlogPage() {
   const posts = getAllBlogPosts();
   const featuredPost = posts[0];
   const remainingPosts = posts.slice(1);
+
+  // Virtualization: limit initial posts for better performance
+  const initialPostCount = 6;
+  const displayPosts = remainingPosts.slice(0, initialPostCount);
 
   const jsonLd = getFAQJsonLd([
     {
@@ -26,7 +34,7 @@ export default function BlogPage() {
     <div className="space-y-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
       />
       <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold mb-3">
@@ -52,7 +60,7 @@ export default function BlogPage() {
           Latest Articles
         </h2>
         <div className="grid gap-6 md:grid-cols-2">
-          {remainingPosts.map((post) => (
+          {displayPosts.map((post) => (
             <BlogCard key={post.id} post={post} />
           ))}
         </div>

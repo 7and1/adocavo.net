@@ -1,4 +1,4 @@
-import { getFAQJsonLd } from "@/lib/seo";
+import { getFAQJsonLd, safeJsonLdStringify } from "@/lib/seo";
 
 const faqs = [
   {
@@ -39,7 +39,7 @@ export function FAQ({ limit = faqs.length }: FAQProps) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
       />
       <section className="max-w-3xl mx-auto" aria-labelledby="faq-heading">
         <h2 id="faq-heading" className="text-2xl font-bold text-center mb-8">

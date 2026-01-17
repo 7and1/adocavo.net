@@ -1,331 +1,725 @@
-# Adocavo Intelligence - MVP Architecture
+# Adocavo Intelligence - Architecture
 
-**Design Philosophy: God of Simplicity**
+**Current Version:** 2.0.0
+**Last Updated:** 2025-01-16
+**Status:** Production-Ready
+
+---
 
 ## Executive Summary
 
-- **Goal**: AI-powered short video ad script generation (TikTok/Reels/Shorts)
-- **Strategy**: Free-to-use + credit system + waitlist
-- **Timeline**: 2-3 weeks (1 developer)
-- **Monthly Cost**: $5-25 (depends on AI usage)
-- **Confidence**: 9/10
+Adocavo is an AI-powered short video ad script generation platform built entirely on Cloudflare's edge computing platform. The system generates TikTok/Reels/Shorts ad scripts based on viral video hooks and product descriptions.
+
+- **Platform:** Next.js 15 + Cloudflare Workers
+- **AI Model:** Llama 3.1 8B via Workers AI
+- **Database:** D1 (SQLite at the edge)
+- **Deployment:** OpenNext for Cloudflare Workers
+- **Current Status:** Production deployed at https://adocavo.net
 
 ---
 
-## Tech Stack (Cloudflare-Only)
+## Tech Stack
 
-| Component | Technology              | Why                               | Confidence |
-| --------- | ----------------------- | --------------------------------- | ---------- |
-| Frontend  | Next.js (Pages)         | Simple routing, no RSC complexity | 9/10       |
-| Hosting   | Cloudflare Pages        | Zero config, auto deploy          | 10/10      |
-| API       | Pages Functions         | Collocated with frontend          | 9/10       |
-| Database  | D1 (SQLite)             | Serverless SQL, free tier         | 8/10       |
-| AI        | Workers AI (Llama 3.1)  | Native, cheap, fast               | 8/10       |
-| Auth      | Simple email codes → D1 | No external deps                  | 7/10       |
-| Email     | Workers → Resend API    | Transactional only                | 8/10       |
-
-**No**: Separate Workers, R2, KV, Queues, Analytics Engine (overkill for MVP)
+| Component          | Technology          | Version        | Purpose                         |
+| ------------------ | ------------------- | -------------- | ------------------------------- |
+| **Frontend**       | Next.js             | 15.1.11        | React framework with App Router |
+| **UI Components**  | Radix UI            | Latest         | Headless component library      |
+| **Styling**        | Tailwind CSS        | 3.4.16         | Utility-first CSS               |
+| **Runtime**        | OpenNext            | 1.14.8         | Next.js adapter for Cloudflare  |
+| **Database**       | D1                  | -              | SQLite at the edge              |
+| **ORM**            | Drizzle ORM         | 0.38.0         | Type-safe database client       |
+| **AI**             | Workers AI          | -              | Llama 3.1 8B model              |
+| **Authentication** | NextAuth            | 5.0.0-beta.25  | OAuth (Google, GitHub)          |
+| **Testing**        | Vitest + Playwright | 2.1.8 / 1.57.0 | Unit and E2E tests              |
+| **Deployment**     | Wrangler            | 4.58.0         | Cloudflare CLI                  |
 
 ---
 
-## Folder Structure
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Client Layer                                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
+│  │  Browser     │  │  Mobile      │  │  API Client  │              │
+│  │  (Next.js)   │  │  (Responsive)│  │  (External)  │              │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘              │
+└─────────┼──────────────────┼──────────────────┼──────────────────────┘
+          │                  │                  │
+          └──────────────────┼──────────────────┘
+                             │
+┌────────────────────────────┼────────────────────────────────────────┐
+│                    Cloudflare CDN / Edge                            │
+│                             │                                        │
+│  ┌──────────────────────────┴──────────────────────────────────┐   │
+│  │                   Cloudflare Workers                          │   │
+│  │  ┌─────────────────────────────────────────────────────────┐│   │
+│  │  │          OpenNext Worker (adocavo-net)                  ││   │
+│  │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐││   │
+│  │  │  │ Next.js     │ │ API Routes  │ │ Middleware           │││   │
+│  │  │  │ App Router  │ │ (Edge)      │ │ (Auth, Rate Limit)   │││   │
+│  │  │  └─────────────┘ └─────────────┘ └─────────────────────┘││   │
+│  │  └─────────────────────────────────────────────────────────┘│   │
+│  └──────────────────────────┬──────────────────────────────────┘   │
+│                             │                                        │
+│  ┌──────────────────────────┴──────────────────────────────────┐   │
+│  │                    Bindings                                  │   │
+│  │  ┌──────────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌────────────┐    │   │
+│  │  │ D1 (DB)  │ │ KV   │ │ R2   │ │ AI   │ │ Assets     │    │   │
+│  │  └──────────┘ └──────┘ └──────┘ └──────┘ └────────────┘    │   │
+│  └──────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Project Structure
 
 ```
 adocavo.net/
-├── pages/
-│   ├── index.jsx                 # Landing + generator
-│   ├── waitlist.jsx              # Waitlist signup
-│   ├── api/
-│   │   ├── generate.js           # AI script generation
-│   │   ├── auth/
-│   │   │   ├── send-code.js      # Email magic link
-│   │   │   └── verify-code.js    # Verify + session
-│   │   └── user/
-│   │       └── credits.js        # Check credits
-│   └── _app.jsx                  # Global layout
-├── components/
-│   ├── Generator.jsx             # Main form (product, tone, duration)
-│   ├── ScriptOutput.jsx          # AI result display
-│   └── CreditBadge.jsx           # Show remaining credits
-├── lib/
-│   ├── db.js                     # D1 client wrapper
-│   ├── ai.js                     # Workers AI client
-│   └── session.js                # Cookie-based sessions
-├── schema.sql                    # D1 tables
-├── wrangler.toml                 # Cloudflare config
-├── next.config.js                # Next.js + CF Pages adapter
-└── package.json
+├── src/
+│   ├── app/                          # Next.js App Router
+│   │   ├── (auth)/                   # Auth-protected routes
+│   │   │   ├── login/
+│   │   │   └── layout.tsx
+│   │   ├── (marketing)/              # Public marketing pages
+│   │   │   ├── [niche]/
+│   │   │   ├── hooks/
+│   │   │   ├── blog/[slug]/         # Blog post pages
+│   │   │   ├── page.tsx
+│   │   │   └── layout.tsx
+│   │   ├── (tools)/                  # Tool pages
+│   │   │   ├── remixer/
+│   │   │   ├── script-history/
+│   │   │   └── layout.tsx
+│   │   ├── api/                      # API Routes
+│   │   │   ├── auth/[...nextauth]/
+│   │   │   ├── analyze-product/      # Product URL analysis
+│   │   │   ├── generate/
+│   │   │   ├── hooks/
+│   │   │   ├── health/
+│   │   │   ├── admin/
+│   │   │   └── ...
+│   │   ├── layout.tsx                # Root layout
+│   │   ├── page.tsx                  # Homepage
+│   │   ├── sitemap.ts
+│   │   └── robots.ts
+│   │
+│   ├── components/                   # React Components
+│   │   ├── ui/                       # shadcn/ui primitives
+│   │   ├── HomepageGenerator.tsx
+│   │   ├── ScriptGenerator.tsx
+│   │   ├── ScriptOutput.tsx
+│   │   ├── ExportButton.tsx          # Export functionality
+│   │   ├── BlogContentRenderer.tsx   # Blog content loader
+│   │   ├── BlogSkeleton.tsx          # Blog loading skeleton
+│   │   ├── CreditBadge.tsx
+│   │   └── ...
+│   │
+│   ├── lib/                          # Core libraries
+│   │   ├── auth.ts                   # NextAuth configuration
+│   │   ├── db.ts                     # Drizzle client
+│   │   ├── schema.ts                 # Database schema
+│   │   ├── cloudflare.ts             # Cloudflare context
+│   │   ├── prompts.ts                # AI prompt templates
+│   │   ├── rate-limit.ts             # Rate limiting logic
+│   │   ├── validations.ts            # Zod schemas
+│   │   ├── url-scraper.ts            # Product URL scraping
+│   │   ├── cache/                    # Caching layer
+│   │   │   ├── kv-cache.ts
+│   │   │   └── hierarchical-cache.ts
+│   │   ├── export/                   # Export functionality
+│   │   │   ├── index.ts
+│   │   │   ├── types.ts
+│   │   │   ├── txt-exporter.ts
+│   │   │   ├── pdf-exporter.ts
+│   │   │   └── notion-formatter.ts
+│   │   ├── services/                 # Business logic
+│   │   │   ├── generation.ts
+│   │   │   ├── hooks.ts
+│   │   │   ├── credits.ts
+│   │   │   └── ...
+│   │   └── ...
+│   │
+│   ├── data/                         # Static data
+│   │   ├── blog-posts.ts
+│   │   ├── category-deep-dives.ts
+│   │   ├── comparison-pages.ts
+│   │   └── example-niches.ts
+│   │
+│   └── types/                        # TypeScript definitions
+│       ├── next-auth.d.ts
+│       └── cloudflare.d.ts
+│
+├── public/content/blog/              # Blog content JSON
+│   ├── index.json                    # Blog post index
+│   ├── tiktok-ad-script-guide.json  # Individual posts
+│   └── ...
+│
+├── scripts/                          # Operational scripts
+│   ├── deploy.sh                     # Enhanced deployment script
+│   ├── rollback.sh                   # Rollback script
+│   ├── validate-env.sh               # Environment validation
+│   ├── setup-secrets.sh              # Secrets setup
+│   ├── monitor-deployment.sh         # Post-deployment monitoring
+│   ├── notify-deployment.sh          # Deployment notifications
+│   ├── migrate-db.sh                 # Database migration helper
+│   ├── create-blog-metadata.ts      # Blog metadata generator
+│   └── extract-blog-content.ts      # Blog content extractor
+│
+├── tests/                            # Test suites
+│   ├── unit/                         # Unit tests (Vitest)
+│   ├── integration/                  # Integration tests
+│   └── e2e/                          # E2E tests (Playwright)
+│
+├── drizzle/migrations/               # Database migrations
+│   ├── 0000_*.sql
+│   ├── 0001_*.sql
+│   └── ...
+│
+├── docs/                             # Documentation
+│   ├── DEPLOYMENT.md                 # Deployment guide
+│   ├── TROUBLESHOOTING.md            # Troubleshooting guide
+│   ├── API.md                        # API reference
+│   ├── PRODUCT-URL-ANALYSIS.md       # URL analysis feature
+│   ├── EXPORT-FEATURE.md             # Export functionality
+│   ├── BLOG-OPTIMIZATION.md          # Blog performance
+│   └── TECHNICAL_ARCHITECTURE.md     # Detailed technical docs
+│
+├── .github/workflows/                # CI/CD
+│   ├── ci.yml                        # Continuous integration
+│   ├── deploy.yml                    # Deployment automation
+│   └── performance.yml               # Performance monitoring
+│
+├── wrangler.toml                     # Cloudflare configuration
+├── next.config.mjs                   # Next.js configuration
+├── package.json
+└── tsconfig.json
 ```
-
-**Lines of Code Estimate**: ~800 LOC
 
 ---
 
-## Database Schema (D1)
+## Database Schema (Drizzle ORM)
+
+### Core Tables
 
 ```sql
--- schema.sql
+-- Users table
 CREATE TABLE users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
+  name TEXT,
   email TEXT UNIQUE NOT NULL,
-  credits INTEGER DEFAULT 3,
-  created_at INTEGER DEFAULT (unixepoch())
+  credits INTEGER DEFAULT 10 NOT NULL,
+  created_at INTEGER DEFAULT (unixepoch()) NOT NULL,
+  updated_at INTEGER DEFAULT (unixepoch()) NOT NULL
 );
 
-CREATE TABLE sessions (
-  token TEXT PRIMARY KEY,
-  user_id INTEGER NOT NULL,
-  expires_at INTEGER NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+-- Hooks table (viral video hooks)
+CREATE TABLE hooks (
+  id TEXT PRIMARY KEY,
+  text TEXT NOT NULL,
+  category TEXT NOT NULL,
+  engagement_score INTEGER DEFAULT 50,
+  source TEXT,
+  is_active INTEGER DEFAULT 1,
+  created_at INTEGER DEFAULT (unixepoch()) NOT NULL,
+  updated_at INTEGER DEFAULT (unixepoch()) NOT NULL
 );
 
-CREATE TABLE generations (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
-  prompt TEXT NOT NULL,
-  script TEXT NOT NULL,
-  created_at INTEGER DEFAULT (unixepoch()),
-  FOREIGN KEY (user_id) REFERENCES users(id)
+-- Generated scripts
+CREATE TABLE generated_scripts (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  hook_id TEXT NOT NULL,
+  product_description TEXT NOT NULL,
+  scripts TEXT NOT NULL,  -- JSON array
+  created_at INTEGER DEFAULT (unixepoch()) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (hook_id) REFERENCES hooks(id)
 );
 
+-- Ratings
+CREATE TABLE ratings (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  generation_id TEXT NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  feedback TEXT,
+  created_at INTEGER DEFAULT (unixepoch()) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (generation_id) REFERENCES generated_scripts(id)
+);
+
+-- Waitlist
 CREATE TABLE waitlist (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
-  created_at INTEGER DEFAULT (unixepoch())
+  interests TEXT,  -- JSON array
+  created_at INTEGER DEFAULT (unixepoch()) NOT NULL
+);
+
+-- Rate limiting
+CREATE TABLE rate_limits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  identifier TEXT NOT NULL,
+  endpoint TEXT NOT NULL,
+  requests_count INTEGER DEFAULT 1,
+  window_start INTEGER NOT NULL,
+  updated_at INTEGER DEFAULT (unixepoch()) NOT NULL,
+  UNIQUE(identifier, endpoint, window_start)
+);
+
+-- Admin review queue
+CREATE TABLE review_queue (
+  id TEXT PRIMARY KEY,
+  hook_text TEXT NOT NULL,
+  category TEXT NOT NULL,
+  submitted_by TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  reviewed_by TEXT,
+  reviewed_at INTEGER,
+  notes TEXT,
+  created_at INTEGER DEFAULT (unixepoch()) NOT NULL
 );
 ```
 
-**Indexes**: Add on `users.email`, `sessions.expires_at` after 100+ users
+### Database Indexes
+
+```sql
+-- Performance indexes
+CREATE INDEX idx_hooks_category ON hooks(category);
+CREATE INDEX idx_hooks_active ON hooks(is_active);
+CREATE INDEX idx_scripts_user_id ON generated_scripts(user_id);
+CREATE INDEX idx_scripts_created_at ON generated_scripts(created_at DESC);
+CREATE INDEX idx_rate_limits_lookup ON rate_limits(identifier, endpoint, window_start);
+```
 
 ---
 
-## Core Workflows
+## API Endpoints
 
-### 1. User Flow (No Login)
+### Public Endpoints
+
+- `GET /api/health` - Health check with system status
+- `GET /api/hooks` - List hooks with pagination
+- `GET /api/hooks/{id}` - Get specific hook
+- `POST /api/waitlist` - Join waitlist
+- `POST /api/track-fake-door` - Track feature interest
+
+### Protected Endpoints (Auth Required)
+
+- `POST /api/generate` - Generate scripts (consumes credit)
+- `GET /api/stats` - User statistics
+- `POST /api/hooks/{id}/favorite` - Favorite/unfavorite hook
+- `GET /api/scripts/favorites` - Get user's favorites
+- `POST /api/scripts/{id}/rate` - Rate a script
+- `POST /api/scripts/{id}/regenerate` - Regenerate script
+- `POST /api/analyze-product` - Analyze product URL with AI
+
+### Admin Endpoints
+
+- `GET /api/admin/metrics` - System metrics
+- `GET /api/admin/review-queue` - Pending submissions
+- `POST /api/admin/review-queue/{id}` - Approve/reject hook
+- `PUT /api/admin/hooks/{id}` - Update hook
+- `DELETE /api/admin/hooks/{id}` - Delete hook
+
+See [API.md](./docs/API.md) for detailed API documentation.
+
+---
+
+## Deployment Architecture
+
+### Environments
+
+| Environment | URL                         | Worker Name     | Database           |
+| ----------- | --------------------------- | --------------- | ------------------ |
+| Production  | https://adocavo.net         | adocavo-net     | adocavo-db         |
+| Preview     | https://preview.adocavo.net | adocavo-preview | adocavo-db-preview |
+| Development | https://dev.adocavo.net     | adocavo-dev     | adocavo-db-dev     |
+
+### Deployment Flow
+
+1. **Pre-deployment Validation**
+   - Environment validation (`validate-env.sh`)
+   - TypeScript compilation
+   - Lint checks
+   - Unit tests
+
+2. **Build Process**
+   - `npm run build` - Next.js build
+   - `npm run build:open-next` - OpenNext bundle
+
+3. **Database Operations**
+   - Automatic backup
+   - Apply migrations
+   - Verify migration success
+
+4. **Deployment**
+   - `wrangler deploy`
+   - Wait for edge propagation (45s)
+
+5. **Health Verification**
+   - Health check endpoint (15 retries)
+   - Smoke tests on key endpoints
+   - Post-deployment monitoring (2 minutes)
+
+6. **Rollback on Failure**
+   - Automatic rollback on critical failures
+   - Manual rollback script available
+
+### CI/CD Pipeline
+
+GitHub Actions workflows:
+
+- `.github/workflows/ci.yml` - Continuous integration
+- `.github/workflows/deploy.yml` - Automated deployment
+- `.github/workflows/performance.yml` - Performance monitoring
+
+---
+
+## Security Features
+
+### Authentication
+
+- NextAuth.js v5 with OAuth (Google, GitHub)
+- HTTP-only session cookies
+- CSRF protection
+- Automatic token rotation
+
+### Rate Limiting
+
+- Per-endpoint rate limits (D1-backed)
+- IP-based limiting for guests
+- User-based limiting for authenticated users
+- Configurable windows and quotas
+
+### Data Protection
+
+- Input validation via Zod schemas
+- SQL injection prevention (Drizzle ORM)
+- XSS protection (React default escaping)
+- Environment variable encryption (Wrangler secrets)
+- Private IP blocking for URL scraping (SSRF prevention)
+
+### Observability
+
+- Structured logging
+- Error tracking
+- Performance metrics
+- Health check endpoints
+
+---
+
+## Key Features
+
+### Product URL Analysis
+
+**Location:** `src/lib/url-scraper.ts`, `src/app/api/analyze-product/`
+
+**Supported Platforms:**
+
+- TikTok (video/product links)
+- Amazon (product pages)
+- Shopify stores
+- Generic web pages
+
+**Capabilities:**
+
+- Extract title, description, price, images
+- AI-powered selling point analysis (Workers AI)
+- 24-hour result caching
+- Private IP blocking for security
+- Rate limiting by user tier
+
+**Flow:**
 
 ```
-Landing → Enter product/tone → Generate → Output
-         ↓ (if no credits)
-         Waitlist signup
+User URL Input
+    ↓
+URL Validation (format, private IPs)
+    ↓
+Rate Limit Check
+    ↓
+Cache Lookup (24hr TTL)
+    ↓
+Platform Detection
+    ↓
+Web Scraping (timeout: 10s)
+    ↓
+AI Analysis (optional)
+    ↓
+Cache & Return Results
 ```
 
-### 2. Credit System
+**Rate Limits:**
 
-- **New user**: 3 free credits (stored in cookie if no email)
-- **Email signup**: 5 credits (persistent)
-- **Rate limit**: 1 generation/10sec (prevent abuse)
+- Anonymous: 3/hour
+- Free users: 10/hour
+- Pro users: 30/hour
 
-### 3. AI Generation (Workers AI)
+**Security:**
 
-```javascript
-// pages/api/generate.js
-export default async function handler(req) {
-  const { product, tone, duration } = req.body;
+- Private IP range blocking (10.x, 172.16-31.x, 192.168.x)
+- Protocol validation (http/https only)
+- URL length limits (500 chars)
+- Timeout protection (10 seconds)
 
-  const prompt = `Generate a ${duration}-second ${tone} TikTok ad script for: ${product}
+### Export Functionality
 
-Format:
-[HOOK] (0-3s)
-[BODY] (3-${duration - 5}s)
-[CTA] (last 5s)`;
+**Location:** `src/lib/export/`, `src/components/ExportButton.tsx`
 
-  const ai = new Ai(env.AI);
-  const response = await ai.run("@cf/meta/llama-3.1-8b-instruct", {
-    messages: [{ role: "user", content: prompt }],
-  });
+**Supported Formats:**
 
-  return response.response;
+1. **Copy All** - Clipboard (plain text)
+2. **Notion Format** - Markdown for Notion
+3. **TXT Download** - Plain text file
+4. **JSON Download** - Structured data
+5. **PDF Download** - Professional PDF with jsPDF
+6. **Email Share** - Mailto link generation
+
+**Features:**
+
+- Lazy-loaded icons for performance
+- Loading states for PDF generation
+- Visual feedback (checkmarks, spinners)
+- Analytics tracking
+- Graceful error handling
+- Mobile-responsive dropdown
+
+**Dependencies:**
+
+- `jspdf` for PDF generation
+- Native Clipboard API
+- Native Blob/File API
+
+### Blog System
+
+**Location:** `src/lib/blog.ts`, `src/lib/blog-loader.ts`
+
+**Architecture:**
+
+- Blog content stored as JSON in `/public/content/blog/`
+- Dynamic content loading on-demand
+- Metadata-only for list views (~2KB initial)
+- Server-side loading for SEO
+- Client-side skeleton states
+
+**Performance Optimization:**
+
+- Bundle size reduced: ~240KB → ~2KB
+- Code splitting for blog posts
+- CDN caching with 1-hour TTL
+- Parallel loading capability
+
+**Workflow:**
+
+```bash
+# After editing blog content
+npm run extract:blog
+
+# Commit generated files
+git add public/content/blog/
+git commit -m "chore: update blog content JSON"
+```
+
+**API:**
+
+- `getAllBlogPosts()` - Metadata only
+- `getPostBySlug(slug)` - Async, loads full content
+- `getPostBySlugSync(slug)` - Fallback for static generation
+
+---
+
+## Performance Optimizations
+
+### Edge Caching
+
+- Static asset caching (1 year)
+- API response caching (KV)
+- Hierarchical cache strategy
+- Stale-while-revalidate patterns
+
+### Database
+
+- Prepared statements
+- Composite indexes
+- Query optimization
+- Connection pooling (D1 native)
+
+### Build
+
+- Tree shaking
+- Code splitting
+- Dynamic imports
+- Bundle size limits (50MB)
+
+---
+
+## Monitoring & Observability
+
+### Health Check Endpoint
+
+`GET /api/health` returns:
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-01-16T10:00:00.000Z",
+  "runtime": "edge",
+  "latency": 123,
+  "checks": {
+    "database": { "status": "healthy", "latency": 45 },
+    "ai": { "status": "healthy", "latency": 78 }
+  }
 }
 ```
 
-**Model**: Llama 3.1 8B (free tier: 10k neurons/day)
-**Confidence**: 8/10 (may need prompt tuning)
+### Logging
+
+- Structured JSON logs
+- Log levels: debug, info, warn, error
+- Request tracing
+- Error context
+
+### Deployment Logs
+
+All deployments logged to `logs/deployments/`:
+
+- `deployment-{ENVIRONMENT}-{TIMESTAMP}.log`
+- `report-{ENVIRONMENT}-{TIMESTAMP}.txt`
+- `backup-{DB_NAME}-{TIMESTAMP}.sql`
 
 ---
 
-## Pages Functions Integration
+## Scripts Reference
 
-```javascript
-// next.config.js
-module.exports = {
-  experimental: {
-    runtime: "experimental-edge", // Optional: make all API routes edge
-  },
-};
+```bash
+# Deployment
+./scripts/deploy.sh [environment] [options]
+
+# Rollback
+./scripts/rollback.sh [environment]
+
+# Environment validation
+./scripts/validate-env.sh [environment]
+
+# Secrets setup
+./scripts/setup-secrets.sh [environment]
+
+# Monitoring
+./scripts/monitor-deployment.sh [environment] [duration_minutes]
+
+# Database migration
+./scripts/migrate-db.sh [environment]
 ```
 
-```toml
-# wrangler.toml
-name = "adocavo-net"
-compatibility_date = "2024-01-01"
+---
 
-[[d1_databases]]
-binding = "DB"
-database_name = "adocavo"
-database_id = "xxx" # from `wrangler d1 create adocavo`
+## Documentation
 
-[ai]
-binding = "AI"
+| Document                                                      | Description                 |
+| ------------------------------------------------------------- | --------------------------- |
+| [DEPLOYMENT.md](./docs/DEPLOYMENT.md)                         | Complete deployment guide   |
+| [TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)               | Common issues and solutions |
+| [API.md](./docs/API.md)                                       | API endpoint reference      |
+| [TECHNICAL_ARCHITECTURE.md](./docs/TECHNICAL_ARCHITECTURE.md) | Detailed technical specs    |
+| [HEALTH_CHECK.md](./docs/HEALTH_CHECK.md)                     | Health monitoring guide     |
+| [SECURITY_HARDENING.md](./docs/SECURITY_HARDENING.md)         | Security best practices     |
+
+---
+
+## Cost Breakdown
+
+| Service          | Usage                 | Monthly Cost            |
+| ---------------- | --------------------- | ----------------------- |
+| Workers Requests | <100k/day             | $0                      |
+| D1 Database      | 5GB storage, 5M reads | $0                      |
+| KV Storage       | 1GB, 10M reads        | $0.50                   |
+| Workers AI       | ~10k neurons/day      | $0-$5                   |
+| R2 Storage       | Backups               | $0.02/GB                |
+| Domain           | adocavo.net           | $10/year (~$0.83/month) |
+
+**Total:** ~$1-6/month during MVP phase
+
+---
+
+## Roadmap
+
+### Completed
+
+- [x] OAuth authentication (Google, GitHub)
+- [x] AI script generation
+- [x] Hook library with categories
+- [x] Credit system
+- [x] Rate limiting
+- [x] Admin dashboard
+- [x] Deployment automation
+- [x] Product URL analysis (TikTok, Amazon, Shopify)
+- [x] Export functionality (PDF, JSON, TXT, Notion, Email)
+- [x] Blog system with dynamic loading
+- [x] Performance optimizations (blog bundle size)
+
+### In Progress
+
+- [ ] Advanced AI models (Claude integration)
+- [ ] Competitor analysis tool
+- [ ] Video rendering capabilities
+
+### Planned
+
+- [ ] Payment integration (Stripe)
+- [ ] Team/collaboration features
+- [ ] API access for developers
+- [ ] Mobile apps
+- [ ] Google Docs export integration
+- [ ] Dropbox/Google Drive export
+
+---
+
+## Contributing
+
+### Development Setup
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/adocavo.net.git
+cd adocavo.net
+
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.example .env.local
+
+# Generate NEXTAUTH_SECRET
+openssl rand -base64 32
+
+# Start development server
+npm run dev
 ```
 
-**Deployment**: `npx wrangler pages deploy`
+### Code Quality
 
----
+```bash
+# Type checking
+npm run typecheck
 
-## Authentication (Simple)
+# Linting
+npm run lint
 
-**No passwords, no OAuth, no JWT libraries**
+# Unit tests
+npm run test:unit
 
-```javascript
-// pages/api/auth/send-code.js
-export default async function handler(req, { env }) {
-  const { email } = req.body;
-  const code = Math.random().toString(36).slice(2, 8);
+# Integration tests
+npm run test:integration
 
-  // Store code (expires in 10 min)
-  await env.DB.prepare("INSERT INTO sessions VALUES (?, NULL, ?)")
-    .bind(code, Date.now() + 600000)
-    .run();
-
-  // Send email (Resend API)
-  await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.RESEND_KEY}` },
-    body: JSON.stringify({
-      from: "noreply@adocavo.net",
-      to: email,
-      subject: "Your Adocavo code",
-      html: `Code: <b>${code}</b> (expires in 10 min)`,
-    }),
-  });
-}
+# E2E tests
+npm run test:e2e
 ```
 
-**Session**: HTTP-only cookie with token (30 day expiry)
-**Confidence**: 7/10 (good for MVP, add proper auth later)
-
 ---
 
-## Cost Breakdown (Monthly)
-
-| Service         | Free Tier             | Estimated Cost     |
-| --------------- | --------------------- | ------------------ |
-| Pages           | Unlimited requests    | $0                 |
-| Pages Functions | 100k req/day          | $0 (under limit)   |
-| D1              | 5GB storage, 5M reads | $0 (MVP traffic)   |
-| Workers AI      | 10k neurons/day       | $0-$5 (if exceed)  |
-| Resend          | 100 emails/day        | $0 (waitlist only) |
-| Domain          | N/A                   | $10/year           |
-
-**Total**: $5-25/month (mostly AI overages)
-**Confidence**: 9/10
-
----
-
-## MVP Feature Set
-
-### Phase 1 (Week 1)
-
-- [ ] Landing page + generator form
-- [ ] D1 setup + migrations
-- [ ] Workers AI integration
-- [ ] Basic output display
-- [ ] Cookie-based credits
-
-### Phase 2 (Week 2)
-
-- [ ] Email auth (magic codes)
-- [ ] Persistent user credits
-- [ ] Waitlist page
-- [ ] Rate limiting (10s cooldown)
-- [ ] Copy to clipboard
-
-### Phase 3 (Week 3)
-
-- [ ] Generation history (last 5)
-- [ ] Polish UI/UX
-- [ ] Analytics (Cloudflare Web Analytics - free)
-- [ ] Deploy + DNS
-
-**Timeline**: 2-3 weeks (1 developer, 6h/day)
-**Confidence**: 8/10
-
----
-
-## What We're NOT Building (MVP)
-
-- Video rendering (scripts only)
-- Payment processing (waitlist gate)
-- Team/collaboration
-- API access
-- Advanced analytics
-- Export formats (plain text only)
-- Social media integrations
-
----
-
-## Risks & Mitigations
-
-| Risk             | Probability | Mitigation                             | Confidence |
-| ---------------- | ----------- | -------------------------------------- | ---------- |
-| AI quality poor  | Medium      | Prompt engineering + fallback to GPT-4 | 7/10       |
-| D1 limits hit    | Low         | Move to Neon Postgres ($20/mo)         | 9/10       |
-| Abuse/spam       | Medium      | Email verification + rate limits       | 8/10       |
-| Slow cold starts | Low         | Pages Functions are warm               | 9/10       |
-
----
-
-## Post-MVP Enhancements (Not Now)
-
-1. **Payments**: Stripe + Workers → buy credits ($10 = 50 credits)
-2. **Better AI**: Switch to Claude 3.5 Haiku (via Workers AI)
-3. **Templates**: Pre-built structures (comparison, testimonial, etc)
-4. **A/B testing**: Generate 2 variants
-5. **Export**: PDF, Google Docs
-
----
-
-## Decision Log
-
-| Decision        | Alternative      | Why Simpler Wins     | Confidence |
-| --------------- | ---------------- | -------------------- | ---------- |
-| Pages Functions | Separate Workers | No routing needed    | 9/10       |
-| D1              | Neon/Supabase    | Native to CF         | 8/10       |
-| Email codes     | OAuth            | No 3rd party         | 7/10       |
-| Cookie credits  | LocalStorage     | Works for anon users | 8/10       |
-| Llama 3.1       | GPT-4 API        | Free tier            | 8/10       |
-| Next.js Pages   | App Router       | Simpler mental model | 9/10       |
-
----
-
-## Success Metrics (MVP)
-
-- 100 waitlist signups (week 1)
-- 1000 scripts generated (month 1)
-- 50% user return rate (generate >1 script)
-- <200ms p95 latency (AI generation)
-
----
-
-## Why This Will Work
-
-1. **One Platform**: Everything on Cloudflare (no context switching)
-2. **No DevOps**: Push to main = deploy
-3. **Free Hosting**: $0 until 10k users
-4. **Boring Tech**: Next.js, SQLite, REST (junior-friendly)
-5. **Escape Hatches**: Can migrate D1 → Postgres, AI → OpenAI in <1 day
-
-**Overall Confidence**: 9/10
-
----
-
-## Next Steps
-
-1. Run: `npm create next-app@latest . -- --app`
-2. Install: `wrangler`, `@opennextjs/cloudflare`
-3. Create D1: `wrangler d1 create adocavo`
-4. Apply schema: `wrangler d1 execute adocavo --file=schema.sql`
-5. Code the 4 core pages (index, waitlist, generate API, auth API)
-6. Deploy: `opennextjs-cloudflare deploy`
-
-**Time to First Deploy**: 4 hours
+**Last Updated:** 2025-01-16
+**Version:** 2.1.0
+**Maintained By:** Adocavo Team

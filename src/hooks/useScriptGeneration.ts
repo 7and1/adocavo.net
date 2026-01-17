@@ -125,7 +125,7 @@ export function useScriptGeneration({
         setLoading(false);
       }
     },
-    [session, allowAnonymous, router, hookId, onSuccess, onError, update],
+    [allowAnonymous, hookId, onError, onSuccess, router, session, update],
   );
 
   const regenerate = useCallback(

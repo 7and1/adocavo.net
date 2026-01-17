@@ -2,10 +2,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import {
   getPostBySlug,
+  getPostBySlugSync,
   getRelatedPosts,
   type BlogPostWithMeta,
 } from "@/lib/blog";
@@ -13,6 +12,7 @@ import { getArticleJsonLd, getBreadcrumbJsonLd } from "@/lib/seo";
 import { formatDate } from "@/lib/utils";
 import { BlogCard } from "@/components/BlogCard";
 import { Button } from "@/components/ui/button";
+import { SafeMarkdown } from "@/components/SafeMarkdown";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -21,7 +21,8 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const post = getPostBySlug(slug);
+    // Use sync version for metadata generation to avoid async overhead
+    const post = getPostBySlugSync(slug);
     const baseUrl = "https://adocavo.net";
     const ogImage = `${baseUrl}/blog/${post.slug}/opengraph-image`;
     return {
@@ -73,7 +74,8 @@ export default async function BlogPost({ params }: Props) {
   const { slug } = await params;
   let post: BlogPostWithMeta;
   try {
-    post = getPostBySlug(slug);
+    // Use async version to load content from JSON files
+    post = await getPostBySlug(slug);
   } catch {
     notFound();
   }
@@ -155,9 +157,7 @@ export default async function BlogPost({ params }: Props) {
       )}
 
       <div className="prose prose-lg max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {post.content}
-        </ReactMarkdown>
+        <SafeMarkdown content={post.content || post.excerpt} />
       </div>
 
       <div className="my-12 p-8 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl text-center">

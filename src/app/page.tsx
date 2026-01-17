@@ -15,6 +15,7 @@ import {
   generateMetadata,
   pageMetadata,
   getWebApplicationJsonLd,
+  safeJsonLdStringify,
 } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -68,7 +69,7 @@ export default function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
       />
       <Header />
       <OnboardingTour />

@@ -123,6 +123,21 @@ export class APIClient {
       body: JSON.stringify({ url }),
     });
   }
+
+  async analyzeProductUrl(url: string) {
+    return this.fetch<{
+      title: string;
+      description: string;
+      price?: string;
+      imageUrl?: string;
+      source: string;
+      formatted: string;
+      aiAnalysis?: string;
+    }>("/api/analyze-product", {
+      method: "POST",
+      body: JSON.stringify({ url }),
+    });
+  }
 }
 
 export class ClientAPIError extends Error {

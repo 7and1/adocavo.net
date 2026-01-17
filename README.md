@@ -4,10 +4,47 @@ AI-powered short video ad script generator for TikTok/Reels/Shorts.
 
 ## Stack
 
-- Next.js 15 (App Router)
-- Cloudflare Workers + D1 + Workers AI
-- Auth.js v5 + Drizzle ORM
-- Tailwind CSS + shadcn/ui
+- **Framework:** Next.js 15 (App Router)
+- **Platform:** Cloudflare Workers + D1 + Workers AI
+- **Auth:** Auth.js v5 (OAuth: Google, GitHub)
+- **Database:** Drizzle ORM with SQLite
+- **UI:** Tailwind CSS + shadcn/ui
+- **Export:** jsPDF, native Clipboard/Blob APIs
+
+## Key Features
+
+### Script Generation
+
+- AI-powered script generation using Llama 3.1 8B
+- Multiple creative angles per generation (3 scripts)
+- Viral hook library with 500+ hooks
+- Category-based hook selection (beauty, tech, finance, pets, fitness, food)
+
+### Product URL Analysis
+
+- **Supported Platforms:** TikTok, Amazon, Shopify, generic web pages
+- Extract title, description, price, images
+- AI-powered selling point analysis
+- 24-hour result caching
+
+### Export Options
+
+- Copy to clipboard (plain text, Notion format)
+- Download as TXT, JSON, or PDF
+- Email client integration
+
+### Performance
+
+- Bundle size optimized (~240KB → ~2KB for blog)
+- CDN-cached content with 1-hour TTL
+- Edge caching for API responses
+
+### Security
+
+- Private IP blocking (SSRF prevention)
+- Rate limiting by user tier
+- Input validation (Zod schemas)
+- Environment variable encryption
 
 ## Quick Start
 
@@ -151,9 +188,15 @@ npm run preview          # Build and preview locally
 
 ## Architecture
 
-- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Complete deployment guide
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture overview
-- **[docs/BLUEPRINT.md](docs/BLUEPRINT.md)** - Technical implementation details
+- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Complete deployment guide
+- **[docs/API.md](docs/API.md)** - API endpoint reference
+- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[docs/PRODUCT-URL-ANALYSIS.md](docs/PRODUCT-URL-ANALYSIS.md)** - URL analysis feature
+- **[docs/EXPORT-FEATURE.md](docs/EXPORT-FEATURE.md)** - Export functionality
+- **[docs/BLOG-OPTIMIZATION.md](docs/BLOG-OPTIMIZATION.md)** - Blog performance
+- **[docs/TECHNICAL_ARCHITECTURE.md](docs/TECHNICAL_ARCHITECTURE.md)** - Technical specs
+- **[docs/SECURITY_HARDENING.md](docs/SECURITY_HARDENING.md)** - Security best practices
 
 ## CI/CD
 

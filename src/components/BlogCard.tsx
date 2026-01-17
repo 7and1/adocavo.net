@@ -18,6 +18,8 @@ export function BlogCard({ post }: { post: BlogPostWithMeta }) {
             width={400}
             height={160}
             className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
           />
         </Link>
       )}

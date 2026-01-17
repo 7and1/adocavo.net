@@ -49,6 +49,8 @@ export function ScriptGenerator({
     hookId: hook.id,
     allowAnonymous,
     onSuccess: () => {
+      // Reset ratings when new scripts are generated to prevent unbounded growth
+      setRatings({});
       setJustGenerated(true);
     },
     onError: (errorMessage) => {
@@ -76,30 +78,28 @@ export function ScriptGenerator({
     },
   ];
 
-  const isValid =
-    productDescription.length >= 20 && productDescription.length <= 500;
-
   const handleGenerate = useCallback(async () => {
-    if (!isValid) return;
+    // Inline validation to avoid computed dependency in useCallback
+    if (productDescription.length < 20 || productDescription.length > 500) {
+      return;
+    }
+
+    // Reset justGenerated before starting new generation
+    setJustGenerated(false);
 
     await generate(
       productDescription,
       remixTone,
       remixInstruction.trim() || undefined,
     );
-  }, [
-    productDescription,
-    remixTone,
-    remixInstruction,
-    isValid,
-    generate,
-  ]);
+  }, [productDescription, remixTone, remixInstruction, generate]);
 
   const handleToggleFavorite = useCallback(async () => {
     if (!generationId) return;
     try {
       await toggleFavorite(generationId);
-    } catch {
+    } catch (err) {
+      console.error("Failed to toggle favorite:", err);
       setError("Unable to update favorites. Please try again.");
     }
   }, [generationId, toggleFavorite, setError]);
@@ -111,7 +111,8 @@ export function ScriptGenerator({
       try {
         await api.rateScript(generationId, { scriptIndex, rating });
         trackEvent("script_rate", { generationId, scriptIndex, rating });
-      } catch {
+      } catch (err) {
+        console.error("Failed to save rating:", err);
         setError("Failed to save rating. Please try again.");
       }
     },
@@ -150,7 +151,7 @@ export function ScriptGenerator({
 
       <Button
         onClick={handleGenerate}
-        disabled={!isValid || loading}
+        disabled={loading}
         data-testid="generate-button"
         className="w-full h-12 text-lg gap-2 shadow-md hover:shadow-lg transition-shadow"
         size="lg"
@@ -182,6 +183,8 @@ export function ScriptGenerator({
           onRegenerate={canInteract ? regenerate : undefined}
           onRate={canInteract ? handleRate : undefined}
           shouldScroll={justGenerated}
+          onScrolled={() => setJustGenerated(false)}
+          productDescription={productDescription}
         />
       )}
 

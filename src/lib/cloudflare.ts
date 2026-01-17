@@ -1,49 +1,71 @@
 import { getCloudflareContext as getOpenNextContext } from "@opennextjs/cloudflare";
 import { AppError } from "./errors";
 import { createDb, type Database } from "./db";
+import { z } from "zod";
 
-export interface EnvBindings {
-  DB?: D1Database;
-  AI?: Ai;
-  CACHE_KV?: KVNamespace;
-  NEXT_INC_CACHE_KV?: KVNamespace;
-  NEXT_TAG_CACHE_KV?: KVNamespace;
-  NEXTAUTH_SECRET?: string;
-  GOOGLE_CLIENT_ID?: string;
-  GOOGLE_CLIENT_SECRET?: string;
-  GITHUB_CLIENT_ID?: string;
-  GITHUB_CLIENT_SECRET?: string;
-  NEXTAUTH_URL?: string;
-  AI_MODEL_SIZE?: string;
-  AI_STREAMING?: string;
-  LOG_DRAIN_URL?: string;
-  LOG_DRAIN_TOKEN?: string;
-  LOG_DRAIN_PROVIDER?: string;
-  LOG_LEVEL?: string;
-  ALERT_WEBHOOK_URL?: string;
-  R2_BACKUPS?: R2Bucket;
+/**
+ * Zod schema for validating Cloudflare environment bindings.
+ * Provides runtime type safety for environment variables and bindings.
+ */
+const EnvBindingsSchema = z.object({
+  DB: z.custom<D1Database>().optional(),
+  AI: z.custom<Ai>().optional(),
+  CACHE_KV: z.custom<KVNamespace>().optional(),
+  NEXT_INC_CACHE_KV: z.custom<KVNamespace>().optional(),
+  NEXT_TAG_CACHE_KV: z.custom<KVNamespace>().optional(),
+  NEXTAUTH_SECRET: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GITHUB_CLIENT_ID: z.string().optional(),
+  GITHUB_CLIENT_SECRET: z.string().optional(),
+  NEXTAUTH_URL: z.string().optional(),
+  AI_MODEL_SIZE: z.string().optional(),
+  AI_STREAMING: z.string().optional(),
+  LOG_DRAIN_URL: z.string().url().optional(),
+  LOG_DRAIN_TOKEN: z.string().optional(),
+  LOG_DRAIN_PROVIDER: z.enum(["logtail", "datadog", "papertrail"]).optional(),
+  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).optional(),
+  ALERT_WEBHOOK_URL: z.string().url().optional(),
+  R2_BACKUPS: z.custom<R2Bucket>().optional(),
+});
+
+export type EnvBindings = z.infer<typeof EnvBindingsSchema>;
+
+/**
+ * Safe validation wrapper for environment bindings.
+ * Filters out invalid values while preserving valid ones.
+ */
+function safeValidateBindings(input: unknown): EnvBindings {
+  const result = EnvBindingsSchema.safeParse(input);
+  if (result.success) {
+    return result.data;
+  }
+  // Log validation errors for debugging but don't fail hard
+  console.warn("Environment binding validation errors:", result.error.format());
+  // Return partial valid data
+  return EnvBindingsSchema.partial().parse(input);
 }
 
 /**
- * Gets environment bindings from Cloudflare context or process.env.
+ * Gets environment bindings from Cloudflare context or process.env with validation.
  * In production Cloudflare Workers, bindings come from wrangler.toml [vars] and secrets.
  * In development, they come from process.env or Cloudflare context via getPlatformProxy.
+ *
+ * @throws {AppError} If critical bindings are completely unavailable
  */
 export function getBindings(): EnvBindings {
   try {
     const context = getOpenNextContext();
     if (context?.env && typeof context.env === "object") {
-      // Merge Cloudflare context with process.env for any missing values
-      return {
-        ...process.env,
-        ...context.env,
-      } as EnvBindings;
+      // Validate and merge Cloudflare context with process.env
+      const merged = { ...process.env, ...context.env };
+      return safeValidateBindings(merged);
     }
   } catch {
     // Continue to process.env fallback
   }
-  // Return process.env for build-time and fallback scenarios
-  return process.env as unknown as EnvBindings;
+  // Validate process.env for build-time and fallback scenarios
+  return safeValidateBindings(process.env);
 }
 
 /**

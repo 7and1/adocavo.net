@@ -107,8 +107,10 @@ export function useFavorites(): UseFavoritesReturn {
         } else {
           await addFavorite(generationId);
         }
-      } catch {
+      } catch (err) {
+        console.error("Failed to toggle favorite:", err);
         setError("Unable to update favorites. Please try again.");
+        throw err;
       }
     },
     [isFavorite, addFavorite, removeFavorite],

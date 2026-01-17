@@ -194,6 +194,63 @@ wrangler secret list --env preview
 
 ## Deployment Process
 
+### Using the Enhanced Deploy Script
+
+The recommended way to deploy is using the enhanced `deploy.sh` script which includes:
+
+- Pre-deployment validation and testing
+- Automated database backups
+- Health checks with retries
+- Automatic rollback on failure
+- Deployment logging
+- Post-deployment monitoring
+
+```bash
+# Deploy to production (default)
+./scripts/deploy.sh
+
+# Deploy to preview
+./scripts/deploy.sh preview
+
+# Deploy with options
+./scripts/deploy.sh production --verbose
+./scripts/deploy.sh preview --skip-tests --no-monitor
+./scripts/deploy.sh production --dry-run
+```
+
+**Deploy Script Options:**
+
+| Option          | Description                                             |
+| --------------- | ------------------------------------------------------- |
+| `--skip-tests`  | Skip pre-deployment tests (lint, typecheck, unit tests) |
+| `--skip-backup` | Skip database backup                                    |
+| `--no-monitor`  | Skip post-deployment monitoring                         |
+| `--verbose`     | Enable verbose output                                   |
+| `--dry-run`     | Simulate deployment without actual changes              |
+
+**Deployment Flow:**
+
+1. **Prerequisites Check** - Validates Node.js, npm, Wrangler, git status
+2. **Environment Validation** - Runs `validate-env.sh` to check configuration
+3. **Pre-deployment Tests** - TypeScript type check, lint, unit tests
+4. **Clean Build** - Removes `.next` and `.open-next` directories
+5. **Build Application** - Runs Next.js and OpenNext builds
+6. **Database Backup** - Creates timestamped backup
+7. **Run Migrations** - Applies D1 migrations
+8. **Deploy** - Deploys to Cloudflare Workers
+9. **Health Check** - Waits for propagation, checks health endpoint (15 retries)
+10. **Smoke Tests** - Tests key endpoints
+11. **Post-deployment Monitoring** - Monitors for 2 minutes
+12. **Generate Report** - Creates deployment report
+
+**Deployment Logs:**
+
+All deployments are logged to `logs/deployments/`:
+
+- `deployment-{ENVIRONMENT}-{TIMESTAMP}.log` - Detailed deployment log
+- `report-{ENVIRONMENT}-{TIMESTAMP}.txt` - Deployment summary report
+- `backup-{DB_NAME}-{TIMESTAMP}.sql` - Database backup (if created)
+
 ### Manual Deployment
 
 #### Production

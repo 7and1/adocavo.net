@@ -1,0 +1,4 @@
+# Cache blog content JSON files for 1 hour
+/public/content/blog
+  Cache-Control: public, max-age=3600, s-maxage=3600
+  Access-Control-Allow-Origin: *

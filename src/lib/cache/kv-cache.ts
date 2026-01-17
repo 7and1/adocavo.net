@@ -217,6 +217,7 @@ export const CacheKeys = {
   userSession: (userId: string) => `session:${userId}` as const,
   apiResponse: (endpoint: string, params: string) =>
     `api:${endpoint}:${params}` as const,
+  productScrape: (url: string) => `product:scrape:${url}` as const,
 };
 
 /**

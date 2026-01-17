@@ -4,6 +4,33 @@ import { isAppError } from "./errors";
 import { logError } from "./logger";
 import { extractRequestIds, createResponseHeaders } from "./logger";
 
+/**
+ * Extracts and validates the hostname from a URL.
+ * Returns null if the URL is invalid or hostname cannot be extracted.
+ */
+function extractHostname(urlString: string | null): string | null {
+  if (!urlString) return null;
+  try {
+    const url = new URL(urlString);
+    return url.hostname;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Validates if a hostname exactly matches an allowed hostname.
+ * Uses exact match to prevent bypass via subdomain-like patterns
+ * (e.g., eviladocavo.net would not match adocavo.net).
+ */
+function isAllowedHostname(
+  hostname: string | null,
+  allowedHosts: readonly string[],
+): boolean {
+  if (!hostname) return false;
+  return allowedHosts.includes(hostname);
+}
+
 export interface APIResponse<T> {
   success: boolean;
   data?: T;
@@ -16,7 +43,11 @@ export interface APIResponse<T> {
 
 /**
  * Validates CSRF protection for state-changing requests (POST, PUT, DELETE, PATCH).
- * Uses origin/referer header validation to ensure requests come from allowed domains.
+ * Uses origin/referer header validation with exact hostname matching to prevent
+ * bypass attempts via look-alike domains (e.g., eviladocavo.net).
+ *
+ * Security: Uses exact hostname matching instead of .includes() to prevent
+ * bypasses where malicious domains contain allowed hostnames as substrings.
  *
  * @param request - The incoming request
  * @param isAuthenticated - Whether the request is authenticated (has valid session)
@@ -39,21 +70,30 @@ export function validateCSRF(
     const referer = request.headers.get("referer");
     const host = request.headers.get("host");
 
-    // Allowed hosts for same-origin requests
+    // Allowed hostnames for same-origin requests
+    // Using ReadonlyArray to prevent modification
     const allowedHosts = [
       "adocavo.net",
       "www.adocavo.net",
       "localhost:3000",
       "127.0.0.1:3000",
-    ];
+    ] as const;
 
-    // Check if origin, referer, or host matches allowed hosts
+    // Extract hostnames from origin and referer headers
+    const originHostname = extractHostname(origin);
+    const refererHostname = extractHostname(referer);
+
+    // Validate using exact hostname matching (prevents eviladocavo.net bypass)
     const isValidOrigin =
-      (origin && allowedHosts.some((h) => origin.includes(h))) ||
-      (referer && allowedHosts.some((h) => referer.includes(h))) ||
-      (host && allowedHosts.includes(host));
+      isAllowedHostname(originHostname, allowedHosts) ||
+      isAllowedHostname(refererHostname, allowedHosts) ||
+      isAllowedHostname(host, allowedHosts);
 
     if (!isValidOrigin) {
+      // Log suspicious origin for security monitoring
+      console.warn(
+        `CSRF validation failed: origin=${originHostname}, referer=${refererHostname}, host=${host}`,
+      );
       return false;
     }
   }
