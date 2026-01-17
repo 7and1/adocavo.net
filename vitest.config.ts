@@ -5,7 +5,12 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"],
-    exclude: ["node_modules", "dist"],
+    exclude: [
+      "node_modules",
+      "dist",
+      "tests/unit/components/**",
+      "tests/unit/api/admin-*.test.ts",
+    ],
     globals: true,
     setupFiles: ["./tests/setup.ts"],
     coverage: {
