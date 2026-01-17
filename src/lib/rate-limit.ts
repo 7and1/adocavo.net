@@ -281,7 +281,7 @@ async function checkRateLimitKV(
           // Increment counter within current window
           state.count += 1;
         }
-      } catch (parseError) {
+      } catch {
         // Corrupted data, start fresh
         console.warn(`Rate limit state corrupted for key ${key}, resetting`);
         state = { count: 1, resetAt: now + windowMs };
