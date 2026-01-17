@@ -152,6 +152,19 @@ const nextConfig = {
         ],
       },
       {
+        source: "/api/auth/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, max-age=0",
+          },
+          {
+            key: "Pragma",
+            value: "no-cache",
+          },
+        ],
+      },
+      {
         source: "/_next/image/:path*",
         headers: [
           {
