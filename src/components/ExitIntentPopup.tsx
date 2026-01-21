@@ -88,14 +88,14 @@ export function ExitIntentPopup() {
               <span className="text-green-600 text-sm">✓</span>
             </div>
             <span className="text-sm text-gray-700">
-              Bonus: 3 script generation credits
+              Bonus: creator-ready hook pack
             </span>
           </div>
         </div>
 
         <div className="space-y-3">
           <Button asChild className="w-full gap-2" size="lg">
-            <Link href="/auth/signin?email-capture=true">
+            <Link href="/">
               <Sparkles className="h-5 w-5" />
               Get My Free Hooks
             </Link>

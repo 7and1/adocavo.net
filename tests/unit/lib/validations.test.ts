@@ -18,6 +18,7 @@ describe("validations", () => {
       hookId: "hook-123",
       productDescription:
         "This is a valid product description that meets the minimum length requirement",
+      turnstileToken: "token-123",
     };
 
     it("validates generate request", () => {
@@ -30,6 +31,7 @@ describe("validations", () => {
       const result = generateRequestSchema.safeParse({
         hookId: "hook_1",
         productDescription: "Too short",
+        turnstileToken: "token-123",
       });
 
       expect(result.success).toBe(false);
@@ -39,6 +41,7 @@ describe("validations", () => {
       const data = {
         hookId: "hook-123",
         productDescription: "  description with spaces  ",
+        turnstileToken: "token-123",
       };
 
       const result = generateRequestSchema.safeParse(data);
@@ -52,6 +55,7 @@ describe("validations", () => {
       const data = {
         hookId: "hook-123",
         productDescription: "x".repeat(1001),
+        turnstileToken: "token-123",
       };
 
       const result = generateRequestSchema.safeParse(data);
@@ -68,6 +72,7 @@ describe("validations", () => {
       const data = {
         hookId: "",
         productDescription: validData.productDescription,
+        turnstileToken: "token-123",
       };
 
       const result = generateRequestSchema.safeParse(data);
@@ -79,6 +84,7 @@ describe("validations", () => {
       const data = {
         hookId: "x".repeat(100),
         productDescription: validData.productDescription,
+        turnstileToken: "token-123",
       };
 
       const result = generateRequestSchema.safeParse(data);
@@ -90,9 +96,19 @@ describe("validations", () => {
       const data = {
         hookId: "x".repeat(101),
         productDescription: validData.productDescription,
+        turnstileToken: "token-123",
       };
 
       const result = generateRequestSchema.safeParse(data);
+
+      expect(result.success).toBe(false);
+    });
+
+    it("should require turnstile token", () => {
+      const result = generateRequestSchema.safeParse({
+        hookId: "hook-123",
+        productDescription: validData.productDescription,
+      });
 
       expect(result.success).toBe(false);
     });
@@ -545,6 +561,7 @@ describe("validations", () => {
       const result = validate(schema, {
         hookId: "hook-123",
         productDescription: "Valid product description",
+        turnstileToken: "token-123",
       });
 
       expect(result.success).toBe(true);

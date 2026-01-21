@@ -10,8 +10,8 @@ const faqs = [
     a: "Select a viral hook from our library, enter your product details, and our AI generates 3 unique script variations. Each script uses proven frameworks like the 5-part structure: Hook, Problem, Product, Proof, CTA. Scripts are optimized to sound authentic and native to TikTok.",
   },
   {
-    q: "How many credits do I need?",
-    a: "Each script generation uses 1 credit and produces 3 variations. New users get 10 free credits to start. When you run out, you can join the waitlist for premium access and future credit options.",
+    q: "Is it free to use?",
+    a: "Yes. Adocavo is free to use and protected by a quick verification step to prevent abuse. Fair-use rate limits keep things fast for everyone.",
   },
   {
     q: "What categories do you support?",

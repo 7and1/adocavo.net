@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { ToneSelector } from "@/components/ToneSelector";
 import { GeneratedResults } from "@/components/GeneratedResults";
 import { WaitlistModal } from "@/components/WaitlistModal";
 import { GenerationProgress } from "@/components/GenerationProgress";
+import { TurnstileWidget, type TurnstileHandle } from "@/components/TurnstileWidget";
 import { api } from "@/lib/client-api";
 import { trackEvent } from "@/lib/analytics";
 import type { Hook } from "@/lib/schema";
@@ -23,7 +24,7 @@ export interface ScriptGeneratorProps {
 
 export function ScriptGenerator({
   hook,
-  allowAnonymous = false,
+  allowAnonymous = true,
 }: ScriptGeneratorProps) {
   const { data: session } = useSession();
 
@@ -33,6 +34,9 @@ export function ScriptGenerator({
   const [showWaitlist, setShowWaitlist] = useState(false);
   const [justGenerated, setJustGenerated] = useState(false);
   const [ratings, setRatings] = useState<Record<number, number>>({});
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileError, setTurnstileError] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const { favoriteIds, toggleFavorite } = useFavorites();
 
@@ -54,10 +58,7 @@ export function ScriptGenerator({
       setJustGenerated(true);
     },
     onError: (errorMessage) => {
-      if (
-        errorMessage.includes("credits") ||
-        errorMessage.includes("INSUFFICIENT_CREDITS")
-      ) {
+      if (errorMessage.toLowerCase().includes("limit")) {
         setShowWaitlist(true);
       }
     },
@@ -78,21 +79,37 @@ export function ScriptGenerator({
     },
   ];
 
+  const isValid =
+    productDescription.length >= 20 && productDescription.length <= 500;
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+
   const handleGenerate = useCallback(async () => {
-    // Inline validation to avoid computed dependency in useCallback
-    if (productDescription.length < 20 || productDescription.length > 500) {
+    if (!isValid) return;
+    if (!turnstileToken) {
+      setError("Please complete the verification to continue.");
       return;
     }
 
-    // Reset justGenerated before starting new generation
-    setJustGenerated(false);
-
-    await generate(
-      productDescription,
-      remixTone,
-      remixInstruction.trim() || undefined,
-    );
-  }, [productDescription, remixTone, remixInstruction, generate]);
+    try {
+      await generate(
+        productDescription,
+        remixTone,
+        remixInstruction.trim() || undefined,
+        turnstileToken,
+      );
+    } finally {
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
+    }
+  }, [
+    productDescription,
+    remixTone,
+    remixInstruction,
+    isValid,
+    generate,
+    turnstileToken,
+    setError,
+  ]);
 
   const handleToggleFavorite = useCallback(async () => {
     if (!generationId) return;
@@ -149,9 +166,41 @@ export function ScriptGenerator({
         disabled={loading}
       />
 
+      {siteKey ? (
+        <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-2">
+          <p className="text-sm text-gray-600">
+            Complete the verification to generate scripts.
+          </p>
+          <TurnstileWidget
+            ref={turnstileRef}
+            siteKey={siteKey}
+            action="generate"
+            onVerify={(token) => {
+              setTurnstileToken(token);
+              setTurnstileError(null);
+            }}
+            onExpire={() => {
+              setTurnstileToken(null);
+              setTurnstileError("Verification expired. Please try again.");
+            }}
+            onError={() => {
+              setTurnstileToken(null);
+              setTurnstileError("Verification failed. Please retry.");
+            }}
+          />
+          {turnstileError && (
+            <p className="text-sm text-red-600">{turnstileError}</p>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          Verification unavailable. Please refresh or contact support.
+        </div>
+      )}
+
       <Button
         onClick={handleGenerate}
-        disabled={loading}
+        disabled={!isValid || loading || !turnstileToken || !siteKey}
         data-testid="generate-button"
         className="w-full h-12 text-lg gap-2 shadow-md hover:shadow-lg transition-shadow"
         size="lg"

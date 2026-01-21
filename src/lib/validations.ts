@@ -4,6 +4,9 @@ const id = z.string().min(1).max(100);
 const email = z.string().email();
 const hookText = z.string().min(8).max(200);
 const engagementScore = z.number().int().min(0).max(100);
+const turnstileTokenSchema = z
+  .string()
+  .min(1, "Verification is required to continue");
 
 export const hookCategorySchema = z.enum([
   "beauty",
@@ -181,6 +184,7 @@ export const generateRequestSchema = z.object({
     .max(200, "Remix instruction must not exceed 200 characters")
     .optional()
     .transform((val) => (val ? val.trim().slice(0, 200) : val)),
+  turnstileToken: turnstileTokenSchema,
 });
 
 export const waitlistRequestSchema = z.object({
@@ -288,6 +292,7 @@ export const analyzeRequestSchema = z.object({
         return false;
       }
     }, "Must be a valid TikTok URL"),
+  turnstileToken: turnstileTokenSchema,
 });
 
 export type GenerateRequest = z.infer<typeof generateRequestSchema>;

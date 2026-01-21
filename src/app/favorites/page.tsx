@@ -89,7 +89,7 @@ export default function FavoritesPage() {
 
   const handleToggleFavorite = async (hookId: string, isFavorited: boolean) => {
     if (!session?.user?.id) {
-      toast.error("Please sign in to manage favorites");
+      toast.error("Favorites are unavailable in free mode.");
       return;
     }
 
@@ -135,11 +135,11 @@ export default function FavoritesPage() {
               My Favorites
             </h1>
             <p className="text-gray-600">
-              Sign in to access your favorite hooks
+              Favorites aren&apos;t available in free mode.
             </p>
           </div>
           <Button asChild size="lg">
-            <Link href="/auth/signin">Sign In to Continue</Link>
+            <Link href="/">Back to Hook Library</Link>
           </Button>
         </div>
       </div>
@@ -237,21 +237,21 @@ export default function FavoritesPage() {
             <Heart className="h-12 w-12 text-gray-300 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
               {!session
-                ? "Sign in to save favorites"
+                ? "Favorites are disabled in free mode"
                 : favorites.length === 0
                   ? "No favorites yet"
                   : "No favorites found"}
             </h3>
             <p className="text-gray-500 text-center mb-4 max-w-md">
               {!session
-                ? "Sign in to start building your personal collection of favorite hooks."
+                ? "Favorites require an account and are currently disabled."
                 : favorites.length === 0
                   ? "Start adding hooks to your favorites by clicking the bookmark icon on any hook card."
                   : "Try adjusting your search or filter criteria."}
             </p>
             {!session ? (
               <Button asChild>
-                <Link href="/auth/signin">Sign In</Link>
+                <Link href="/">Browse hooks</Link>
               </Button>
             ) : favorites.length === 0 ? (
               <Button asChild>

@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
@@ -11,7 +10,11 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect("/auth/signin?callbackUrl=/dashboard");
+    return (
+      <div className="text-center text-gray-600">
+        Script history isn&apos;t stored in free mode.
+      </div>
+    );
   }
 
   const env = getBindings();

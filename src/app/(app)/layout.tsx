@@ -11,11 +11,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <main className="container mx-auto px-4 py-10">
         <div className="mb-6 flex flex-wrap gap-2 text-sm text-gray-600">
           <Button asChild variant="ghost" size="sm">
-            <Link href="/dashboard" prefetch>
-              My Scripts
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm">
             <Link href="/analyze" prefetch>
               Analyze Competitors
             </Link>

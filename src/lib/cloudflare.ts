@@ -27,6 +27,8 @@ const EnvBindingsSchema = z.object({
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).optional(),
   ALERT_WEBHOOK_URL: z.string().url().optional(),
   R2_BACKUPS: z.custom<R2Bucket>().optional(),
+  TURNSTILE_SECRET_KEY: z.string().optional(),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
 });
 
 export type EnvBindings = z.infer<typeof EnvBindingsSchema>;

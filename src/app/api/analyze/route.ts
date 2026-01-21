@@ -1,43 +1,15 @@
-import {
-  withErrorHandler,
-  successResponse,
-  validateCSRF,
-} from "@/lib/api-utils";
-import {
-  AppError,
-  AuthRequiredError,
-  RateLimitError,
-  ValidationError,
-} from "@/lib/errors";
-import { auth } from "@/lib/auth";
+import { withErrorHandler, successResponse } from "@/lib/api-utils";
+import { AppError, RateLimitError, ValidationError } from "@/lib/errors";
 import { analyzeRequestSchema } from "@/lib/validations";
 import { getBindings } from "@/lib/cloudflare";
 import { createDb } from "@/lib/db";
 import { checkRateLimit, getRateLimitContext } from "@/lib/rate-limit";
 import { analyzeTikTokUrl } from "@/lib/services/competitor-analysis";
-import { NextResponse } from "next/server";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export const dynamic = "force-dynamic";
 
 export const POST = withErrorHandler(async (request: Request) => {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new AuthRequiredError();
-  }
-
-  if (!validateCSRF(request, true)) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: "CSRF_ERROR",
-          message: "Invalid origin. Please refresh and try again.",
-        },
-      },
-      { status: 403 },
-    );
-  }
-
   const body = await request.json().catch(() => {
     throw new ValidationError();
   });
@@ -49,16 +21,20 @@ export const POST = withErrorHandler(async (request: Request) => {
     throw new AppError("ENV_MISSING", "AI/DB bindings missing", 500);
   }
 
+  await verifyTurnstileToken(request, parsed.turnstileToken, {
+    action: "analyze",
+    env,
+  });
+
   const db = createDb(env.DB as D1Database);
-  const { identifier, tier } = await getRateLimitContext(request, session);
-  const rate = await checkRateLimit(db, identifier, "analyze", tier);
+  const { identifier } = await getRateLimitContext(request, null);
+  const rate = await checkRateLimit(db, identifier, "analyze", "free");
 
   if (!rate.allowed) {
     throw new RateLimitError(rate.retryAfter);
   }
 
   const result = await analyzeTikTokUrl(env.AI as Ai, env.DB as D1Database, {
-    userId: session.user.id,
     url: parsed.url,
   });
 

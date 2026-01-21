@@ -125,6 +125,8 @@ if [ -n "$ENV_FILE" ]; then
     check_env_var "NEXTAUTH_URL" "$ENV_FILE"
     check_env_var "NEXTAUTH_SECRET" "$ENV_FILE"
     check_env_var "NEXT_PUBLIC_SITE_URL" "$ENV_FILE"
+    check_env_var "NEXT_PUBLIC_TURNSTILE_SITE_KEY" "$ENV_FILE"
+    check_env_var "TURNSTILE_SECRET_KEY" "$ENV_FILE"
 else
     echo -e "${RED}✗${NC} Cannot validate environment variables - no .env file found"
     ((ISSUES++))

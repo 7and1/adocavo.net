@@ -42,6 +42,7 @@ echo "  - GOOGLE_CLIENT_ID (Google OAuth)"
 echo "  - GOOGLE_CLIENT_SECRET (Google OAuth)"
 echo "  - GITHUB_CLIENT_ID (GitHub OAuth)"
 echo "  - GITHUB_CLIENT_SECRET (GitHub OAuth)"
+echo "  - TURNSTILE_SECRET_KEY (Cloudflare Turnstile)"
 echo ""
 echo "Optional Secrets:"
 echo "  - LOG_DRAIN_TOKEN (for external logging)"
@@ -49,6 +50,7 @@ echo ""
 echo "How to generate values:"
 echo "  1. NEXTAUTH_SECRET: openssl rand -base64 32"
 echo "  2. OAuth credentials: Get from Google/GitHub developer consoles"
+echo "  3. Turnstile secret: Cloudflare dashboard -> Turnstile"
 echo ""
 read -p "Continue? (yes/no): " CONFIRM
 
@@ -110,6 +112,7 @@ set_secret "GOOGLE_CLIENT_ID" "Google OAuth Client ID (from Google Cloud Console
 set_secret "GOOGLE_CLIENT_SECRET" "Google OAuth Client Secret" "required"
 set_secret "GITHUB_CLIENT_ID" "GitHub OAuth App Client ID (from GitHub Developer Settings)" "required"
 set_secret "GITHUB_CLIENT_SECRET" "GitHub OAuth App Client Secret" "required"
+set_secret "TURNSTILE_SECRET_KEY" "Cloudflare Turnstile secret key" "required"
 
 # Set optional secrets
 echo ""

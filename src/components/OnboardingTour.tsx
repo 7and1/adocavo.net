@@ -29,13 +29,7 @@ const tourSteps = [
     target: ".script-generator",
     title: "Generate Scripts",
     content:
-      "Describe your product, choose a tone, and get 3 personalized scripts in seconds. Each variation targets a different angle.",
-  },
-  {
-    target: ".user-credits",
-    title: "Credits & Upgrades",
-    content:
-      "Each generation uses 1 credit. Upgrade to Pro for 100 credits/month or Team for 500 credits/month.",
+      "Describe your product, choose a tone, complete verification, and get 3 personalized scripts in seconds.",
   },
 ];
 

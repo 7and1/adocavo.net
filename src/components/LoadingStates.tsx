@@ -109,7 +109,7 @@ export function CreditsExplanation({ onClose }: { onClose: () => void }) {
             </div>
             <div>
               <h4 className="font-medium text-gray-900">
-                1 Credit = 3 Scripts
+                3 Script Variations Per Run
               </h4>
               <p className="text-sm text-gray-600">
                 Each generation creates 3 unique script variations for different
@@ -123,26 +123,22 @@ export function CreditsExplanation({ onClose }: { onClose: () => void }) {
               <TrendingUp className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">Earn More Credits</h4>
+              <h4 className="font-medium text-gray-900">
+                Verification Keeps It Fast
+              </h4>
               <p className="text-sm text-gray-600">
-                Rate scripts to help us improve. Future updates will include
-                credit rewards.
+                We use a quick verification step to prevent abuse and keep
+                generations responsive for everyone.
               </p>
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-2">Credit Tiers</h4>
+            <h4 className="font-medium text-gray-900 mb-2">Fair Use</h4>
             <ul className="space-y-1 text-sm text-gray-600">
-              <li>
-                • <strong>Free:</strong> 10 credits to start
-              </li>
-              <li>
-                • <strong>Pro ($29/mo):</strong> 100 credits/month
-              </li>
-              <li>
-                • <strong>Team ($99/mo):</strong> 500 credits/month
-              </li>
+              <li>• Free access with verification</li>
+              <li>• Rate limits protect system stability</li>
+              <li>• Pro tiers coming soon</li>
             </ul>
           </div>
         </div>

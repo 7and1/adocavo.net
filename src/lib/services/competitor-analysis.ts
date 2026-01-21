@@ -43,7 +43,7 @@ export interface CompetitorAnalysisResult {
 }
 
 export interface AnalyzeInput {
-  userId: string;
+  userId?: string | null;
   url: string;
 }
 
@@ -94,20 +94,22 @@ export async function analyzeTikTokUrl(
     const id = nanoid();
     const createdAt = new Date().toISOString();
 
-    await db.insert(competitorAnalyses).values({
-      id,
-      userId: input.userId,
-      tiktokUrl: metadata.canonicalUrl,
-      title: metadata.title,
-      author: metadata.author,
-      transcript: metadata.transcript,
-      transcriptSource: metadata.transcriptSource,
-      hook: parsed.data.hook,
-      structure: JSON.stringify(parsed.data.structure),
-      template: JSON.stringify(parsed.data.template),
-      cta: parsed.data.cta ?? null,
-      notes: JSON.stringify(parsed.data.notes ?? []),
-    });
+    if (input.userId) {
+      await db.insert(competitorAnalyses).values({
+        id,
+        userId: input.userId,
+        tiktokUrl: metadata.canonicalUrl,
+        title: metadata.title,
+        author: metadata.author,
+        transcript: metadata.transcript,
+        transcriptSource: metadata.transcriptSource,
+        hook: parsed.data.hook,
+        structure: JSON.stringify(parsed.data.structure),
+        template: JSON.stringify(parsed.data.template),
+        cta: parsed.data.cta ?? null,
+        notes: JSON.stringify(parsed.data.notes ?? []),
+      });
+    }
 
     return {
       success: true,

@@ -8,8 +8,9 @@ const SESSION_COOKIES = [
   "authjs.session-token",
 ];
 
-const PROTECTED_PAGES = ["/dashboard", "/remix", "/admin"];
-const PROTECTED_APIS = ["/api/generate", "/api/scripts"];
+const AUTH_REQUIRED_PAGES = ["/admin"];
+const AUTH_REQUIRED_APIS = ["/api/admin"];
+const RATE_LIMITED_APIS = ["/api/generate", "/api/scripts", "/api/analyze"];
 
 const RATE_LIMITS = [
   { prefix: "/api/generate", limit: 10, windowSeconds: 60 },
@@ -120,14 +121,20 @@ export async function middleware(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const isProtectedPage = PROTECTED_PAGES.some((prefix) =>
+    const isAuthRequiredPage = AUTH_REQUIRED_PAGES.some((prefix) =>
       pathname.startsWith(prefix),
     );
-    const isProtectedApi = PROTECTED_APIS.some((prefix) =>
+    const isAuthRequiredApi = AUTH_REQUIRED_APIS.some((prefix) =>
+      pathname.startsWith(prefix),
+    );
+    const isRateLimitedApi = RATE_LIMITED_APIS.some((prefix) =>
       pathname.startsWith(prefix),
     );
 
-    if ((isProtectedPage || isProtectedApi) && !hasSessionCookie(request)) {
+    if (
+      (isAuthRequiredPage || isAuthRequiredApi) &&
+      !hasSessionCookie(request)
+    ) {
       logInfo("Unauthorized access attempt", {
         requestId,
         route: pathname,
@@ -135,11 +142,11 @@ export async function middleware(request: NextRequest) {
         ip,
         userAgent,
         correlationId: requestContext.getCorrelationId(),
-        isProtectedPage,
-        isProtectedApi,
+        isProtectedPage: isAuthRequiredPage,
+        isProtectedApi: isAuthRequiredApi,
       });
 
-      if (isProtectedApi) {
+      if (isAuthRequiredApi) {
         return NextResponse.json(
           {
             success: false,
@@ -161,7 +168,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (
-      isProtectedApi &&
+      isRateLimitedApi &&
       ["POST", "PUT", "PATCH", "DELETE"].includes(request.method)
     ) {
       const rule = RATE_LIMITS.find((r) => pathname.startsWith(r.prefix));

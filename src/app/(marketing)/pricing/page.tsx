@@ -19,36 +19,21 @@ interface PricingTier {
 
 const pricingTiers: PricingTier[] = [
   {
-    name: "Anonymous",
-    subtitle: "Quick access without any setup",
+    name: "Free",
+    subtitle: "Captcha-protected access",
     price: "$0 /month",
-    description: "3 generations/day rate limit",
+    description: "Fair-use rate limits included",
     features: [
       "Access to 50+ proven hooks",
       "Basic script generation",
       "3 script variations per generation",
       "No account required",
-      "No API key required",
+      "Captcha verification for abuse protection",
     ],
-    cta: "Try It Now",
+    cta: "Start Free",
     href: "/",
-  },
-  {
-    name: "Free",
-    subtitle: "Sign in with GitHub",
-    price: "$0 /month",
-    description: "Higher limits with a free account",
-    features: [
-      "50 credits/day rate limit",
-      "Save favorites to wishlist",
-      "Personal dashboard",
-      "Generation history tracking",
-      "All Anonymous features",
-    ],
-    cta: "Get Free Account",
-    href: "/auth/signin",
     highlighted: true,
-    badge: "Recommended",
+    badge: "Always Free",
   },
   {
     name: "Pro",
@@ -56,7 +41,7 @@ const pricingTiers: PricingTier[] = [
     price: "TBA",
     description: "High-volume with dedicated support",
     features: [
-      "Unlimited generations",
+      "Higher usage limits",
       "Priority generation speed",
       "Advanced AI models",
       "Export to PDF/Notion",
@@ -71,14 +56,14 @@ const pricingTiers: PricingTier[] = [
 
 const faqs = [
   {
-    question: "What is a credit?",
+    question: "How does verification work?",
     answer:
-      "One credit equals one script generation (3 variations). Guests get 3 per day, and free accounts get 50 per day. Credits reset daily at midnight UTC.",
+      "Before each generation, you complete a quick verification to prevent abuse and keep results fast for everyone.",
   },
   {
-    question: "Why should I sign up?",
+    question: "Do I need an account?",
     answer:
-      "Signing up with GitHub gives you more daily credits (50 vs 3), plus a personal dashboard to save your favorite hooks and track your generation history.",
+      "No account is required to generate scripts. Just complete the verification and you’re ready to go.",
   },
   {
     question: "Do I need a credit card?",
@@ -103,13 +88,13 @@ export default function PricingPage() {
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
-            Start free with 3 guest generations per day. Sign in with GitHub to
-            unlock 50 generations per day, a dashboard, and usage tracking.
+            Start free with captcha-protected access. Fair-use limits keep the
+            system fast for everyone.
           </p>
           <p className="text-gray-500">No credit card required.</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
+        <div className="grid md:grid-cols-2 gap-6 mb-16">
           {pricingTiers.map((tier) => (
             <div
               key={tier.name}
@@ -207,9 +192,9 @@ export default function PricingPage() {
           <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
             <Clock className="h-8 w-8 text-blue-500 flex-shrink-0" />
             <div>
-              <div className="font-semibold text-gray-900">Daily Reset</div>
+              <div className="font-semibold text-gray-900">Fair Use</div>
               <div className="text-sm text-gray-500">
-                Credits refresh every day
+                Rate limits protect performance
               </div>
             </div>
           </div>
@@ -257,7 +242,7 @@ export default function PricingPage() {
             Not sure which plan is right for you?
           </h2>
           <p className="text-gray-600 mb-6">
-            Start with anonymous access and sign up when you need more credits.
+            Start free and join the waitlist if you need higher limits later.
           </p>
           <Button asChild size="lg">
             <Link href="/">Get Started Free</Link>

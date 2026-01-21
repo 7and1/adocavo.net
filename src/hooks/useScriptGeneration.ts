@@ -33,6 +33,7 @@ export interface UseScriptGenerationReturn {
     productDescription: string,
     remixTone?: string,
     remixInstruction?: string,
+    turnstileToken?: string,
   ) => Promise<void>;
   regenerate: (angle: string) => Promise<void>;
   setError: (error: string | null) => void;
@@ -41,7 +42,7 @@ export interface UseScriptGenerationReturn {
 
 export function useScriptGeneration({
   hookId,
-  allowAnonymous = false,
+  allowAnonymous = true,
   onSuccess,
   onError,
 }: UseScriptGenerationOptions): UseScriptGenerationReturn {
@@ -59,10 +60,10 @@ export function useScriptGeneration({
       productDescription: string,
       remixTone?: string,
       remixInstruction?: string,
+      turnstileToken?: string,
     ) => {
       const hasUser = !!session?.user?.id;
       if (!hasUser && !allowAnonymous) {
-        router.push(`/auth/signin?callbackUrl=/remix/${hookId}`);
         return;
       }
 
@@ -84,6 +85,7 @@ export function useScriptGeneration({
           productDescription.trim(),
           remixTone,
           remixInstruction?.trim(),
+          turnstileToken,
         );
 
         setScripts(result.scripts);
@@ -107,10 +109,9 @@ export function useScriptGeneration({
         if (err instanceof ClientAPIError && isGuest) {
           if (err.code === "RATE_LIMIT_EXCEEDED") {
             errorMessage =
-              "Guest limit reached - 3 generations per day. Sign in for more.";
+              "Free usage limit reached. Please try again later.";
           } else if (err.isAuthError) {
-            errorMessage =
-              "Please sign in to continue generating more scripts.";
+            errorMessage = "Verification required to continue.";
           }
         }
 

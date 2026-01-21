@@ -29,6 +29,7 @@ export class APIClient {
     productDescription: string,
     remixTone?: string,
     remixInstruction?: string,
+    turnstileToken?: string,
   ) {
     return this.fetch<{
       scripts: Array<{ angle: string; script: string }>;
@@ -41,6 +42,7 @@ export class APIClient {
         productDescription,
         remixTone,
         remixInstruction,
+        turnstileToken,
       }),
     });
   }
@@ -104,7 +106,7 @@ export class APIClient {
     });
   }
 
-  async analyzeUrl(url: string) {
+  async analyzeUrl(url: string, turnstileToken?: string) {
     return this.fetch<{
       id: string;
       tiktokUrl: string;
@@ -120,7 +122,7 @@ export class APIClient {
       createdAt: string;
     }>("/api/analyze", {
       method: "POST",
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, turnstileToken }),
     });
   }
 

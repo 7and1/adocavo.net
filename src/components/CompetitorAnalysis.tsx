@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AlertCircle, Copy, Check, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GenerationProgress } from "@/components/GenerationProgress";
 import { api, ClientAPIError } from "@/lib/client-api";
+import {
+  TurnstileWidget,
+  type TurnstileHandle,
+} from "@/components/TurnstileWidget";
 
 interface AnalysisResult {
   id: string;
@@ -44,11 +48,19 @@ export function CompetitorAnalysis() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [step, setStep] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileError, setTurnstileError] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!url.trim()) {
       setError("Please paste a TikTok URL to analyze.");
+      return;
+    }
+    if (!turnstileToken) {
+      setError("Please complete the verification to continue.");
       return;
     }
 
@@ -61,7 +73,7 @@ export function CompetitorAnalysis() {
     const timerTwo = setTimeout(() => setStep(2), 3200);
 
     try {
-      const response = await api.analyzeUrl(url.trim());
+      const response = await api.analyzeUrl(url.trim(), turnstileToken);
       setResult(response);
     } catch (err) {
       if (err instanceof ClientAPIError) {
@@ -73,6 +85,8 @@ export function CompetitorAnalysis() {
       clearTimeout(timerOne);
       clearTimeout(timerTwo);
       setLoading(false);
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
     }
   }
 
@@ -94,23 +108,62 @@ export function CompetitorAnalysis() {
           Paste a TikTok ad URL and we&apos;ll extract the transcript, highlight
           the hook, and turn it into a reusable script template.
         </p>
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-3 sm:flex-row"
-        >
-          <div className="relative flex-1">
-            <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-              placeholder="https://www.tiktok.com/@brand/video/123..."
-              className="pl-10"
-              disabled={loading}
-            />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                placeholder="https://www.tiktok.com/@brand/video/123..."
+                className="pl-10"
+                disabled={loading}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="h-11"
+              disabled={loading || !turnstileToken || !siteKey}
+            >
+              {loading ? "Analyzing..." : "Analyze URL"}
+            </Button>
           </div>
-          <Button type="submit" className="h-11" disabled={loading}>
-            {loading ? "Analyzing..." : "Analyze URL"}
-          </Button>
+
+          {siteKey ? (
+            <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-2">
+              <p className="text-sm text-gray-600">
+                Complete the verification to analyze the URL.
+              </p>
+              <TurnstileWidget
+                ref={turnstileRef}
+                siteKey={siteKey}
+                action="analyze"
+                onVerify={(token) => {
+                  setTurnstileToken(token);
+                  setTurnstileError(null);
+                }}
+                onExpire={() => {
+                  setTurnstileToken(null);
+                  setTurnstileError(
+                    "Verification expired. Please complete it again.",
+                  );
+                }}
+                onError={() => {
+                  setTurnstileToken(null);
+                  setTurnstileError(
+                    "Verification failed. Please retry the captcha.",
+                  );
+                }}
+              />
+              {turnstileError && (
+                <p className="text-sm text-red-600">{turnstileError}</p>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              Verification unavailable. Please refresh or contact support.
+            </div>
+          )}
         </form>
         {error && (
           <div

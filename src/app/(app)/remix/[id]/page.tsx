@@ -1,6 +1,5 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
 import { getBindings } from "@/lib/cloudflare";
 import { getHookById } from "@/lib/services/hooks";
 import { ScriptGenerator } from "@/components/ScriptGenerator";
@@ -23,10 +22,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RemixPage({ params }: Props) {
   const { id } = await params;
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect(`/auth/signin?callbackUrl=/remix/${id}`);
-  }
 
   const env = getBindings();
   if (!env.DB) {
@@ -48,7 +43,7 @@ export default async function RemixPage({ params }: Props) {
           Generate 3 script angles from this hook.
         </p>
       </div>
-      <ScriptGenerator hook={hook} />
+      <ScriptGenerator hook={hook} allowAnonymous />
     </div>
   );
 }

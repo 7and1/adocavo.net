@@ -97,14 +97,14 @@ export function EmailCaptureModal({
     generate: {
       title: "Get 3 Free Hook Examples",
       description:
-        "Enter your email to receive 3 proven viral hooks you can use immediately, plus unlock your first script generation.",
+        "Enter your email to receive 3 proven viral hooks you can use immediately, plus a quick-start guide.",
       cta: "Send Me The Hooks",
     },
     browse: {
-      title: "Unlock Your Free Generation",
+      title: "Get the Free Hook Pack",
       description:
-        "Sign up to get 10 free credits and start generating viral TikTok scripts today.",
-      cta: "Get Started Free",
+        "Join the list to receive creator-tested hooks and updates as we launch new features.",
+      cta: "Get the Free Pack",
     },
     exit: {
       title: "Wait! Don't Leave Empty-Handed",

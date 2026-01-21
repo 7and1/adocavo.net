@@ -37,7 +37,7 @@ export function HookDetailContent({ hook }: HookDetailContentProps) {
 
   const handleToggleFavorite = async () => {
     if (!session?.user?.id) {
-      toast.error("Please sign in to add favorites");
+      toast.error("Favorites are unavailable in free mode.");
       return;
     }
 
@@ -78,7 +78,7 @@ export function HookDetailContent({ hook }: HookDetailContentProps) {
         onClick={handleToggleFavorite}
         variant="outline"
         size="sm"
-        disabled={isLoading}
+        disabled={isLoading || !session?.user?.id}
         className="gap-2"
       >
         {isLoading ? (

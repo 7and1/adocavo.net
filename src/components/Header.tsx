@@ -2,17 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import { CreditBalance } from "@/components/CreditBalance";
-import { Menu, X, Sparkles, Heart } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 
 export interface HeaderProps {
   showCredits?: boolean;
 }
 
 export function Header({ showCredits = true }: HeaderProps) {
-  const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -99,45 +95,9 @@ export function Header({ showCredits = true }: HeaderProps) {
             >
               Pricing
             </Link>
-            {session && (
-              <>
-                <Link
-                  href="/favorites"
-                  prefetch
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1 flex items-center gap-1"
-                >
-                  <Heart className="h-4 w-4" />
-                  Favorites
-                </Link>
-                <Link
-                  href="/dashboard"
-                  prefetch
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 px-2 py-1"
-                >
-                  My Scripts
-                </Link>
-              </>
-            )}
           </nav>
 
           <div className="flex items-center gap-3">
-            {showCredits && session && <CreditBalance />}
-
-            {status === "loading" ? (
-              <div
-                className="h-9 w-20 bg-gray-100 animate-pulse rounded-md"
-                aria-hidden="true"
-              />
-            ) : session ? (
-              <Button variant="outline" size="sm" onClick={() => signOut()}>
-                Sign out
-              </Button>
-            ) : (
-              <Button size="sm" onClick={() => signIn()}>
-                Sign in
-              </Button>
-            )}
-
             <button
               ref={menuButtonRef}
               type="button"
@@ -215,27 +175,6 @@ export function Header({ showCredits = true }: HeaderProps) {
           >
             Pricing
           </Link>
-          {session && (
-            <>
-              <Link
-                href="/favorites"
-                prefetch
-                className="min-h-[48px] px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center gap-2"
-                onClick={closeMobileMenu}
-              >
-                <Heart className="h-4 w-4" />
-                Favorites
-              </Link>
-              <Link
-                href="/dashboard"
-                prefetch
-                className="min-h-[48px] px-3 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center"
-                onClick={closeMobileMenu}
-              >
-                My Scripts
-              </Link>
-            </>
-          )}
         </nav>
       </div>
     </header>

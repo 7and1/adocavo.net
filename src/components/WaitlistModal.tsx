@@ -56,11 +56,9 @@ const features: {
 ];
 
 function deriveTier(credits?: number) {
-  if (credits == null) return undefined;
-  if (credits <= 0) return "out_of_credits";
-  if (credits <= 2) return "low_credits";
-  if (credits <= 5) return "active";
-  return "new";
+  if (credits == null) return "free";
+  if (credits <= 0) return "free";
+  return "free";
 }
 
 export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
@@ -135,12 +133,12 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
             data-testid="waitlist-title"
           >
             <Sparkles className="h-5 w-5 text-primary-500" />
-            {submitted ? "You're on the List!" : "Out of Credits"}
+            {submitted ? "You're on the List!" : "Join the Waitlist"}
           </DialogTitle>
           <DialogDescription className="text-base">
             {submitted
               ? "We'll email you when premium features launch."
-              : "Join the waitlist to get early access to premium features and exclusive discounts."}
+              : "Join the waitlist to get early access to premium features and higher limits."}
           </DialogDescription>
         </DialogHeader>
 

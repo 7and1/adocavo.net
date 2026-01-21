@@ -1,8 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { Shuffle } from "lucide-react";
 import type { Hook } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
@@ -19,7 +17,6 @@ function formatHookLabel(hook: Hook) {
 }
 
 export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
-  const { data: session } = useSession();
   const initialHookId = hooks[0]?.id ?? "";
   const [selectedHookId, setSelectedHookId] = useState(initialHookId);
 
@@ -34,34 +31,6 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
     const next = hooks[Math.floor(Math.random() * hooks.length)];
     setSelectedHookId(next.id);
   };
-
-  const isGuest = !session?.user?.id;
-  const creditsLabel =
-    session?.user?.credits != null ? `${session.user.credits} credits` : null;
-
-  // Handle empty hooks array with friendly UI
-  if (hooks.length === 0) {
-    return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm text-center">
-        <div className="max-w-md mx-auto">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">
-            No hooks available
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            We&apos;re unable to load hooks at the moment. Please refresh the
-            page or try again later.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
-            aria-label="Refresh page to load hooks"
-          >
-            Refresh Page
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   if (!selectedHook) {
     return (
@@ -81,16 +50,14 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-500">
-            {isGuest ? "Guest mode" : "Signed in"}
+            Free access
           </p>
           <h2 className="text-lg font-semibold text-gray-900">
             Generate scripts instantly
           </h2>
         </div>
         <span className="text-xs font-medium text-gray-500">
-          {isGuest
-            ? "3 generations/day"
-            : (creditsLabel ?? "Credits available")}
+          Captcha verification required
         </span>
       </div>
 
@@ -125,23 +92,16 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
             Random
           </Button>
         </div>
-        {isGuest && (
-          <p className="text-xs text-gray-500">
-            Want more than 3/day?{" "}
-            <Link href="/auth/signin" className="text-primary-600 underline">
-              Sign in
-            </Link>{" "}
-            for extra credits.
-          </p>
-        )}
+        <p className="text-xs text-gray-500">
+          Complete the verification below to run a generation.
+        </p>
       </div>
 
       <div className="mt-6">
-        {/* selectedHook is guaranteed to be defined here due to early return above */}
         <ScriptGenerator
-          hook={selectedHook!}
+          hook={selectedHook}
           allowAnonymous
-          key={selectedHook!.id}
+          key={selectedHook.id}
         />
       </div>
     </div>

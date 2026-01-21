@@ -16,13 +16,13 @@ export default function AuthErrorPage() {
         </div>
         <h1 className="text-3xl font-bold">Authentication error</h1>
         <p className="text-gray-600">
-          We couldn&apos;t sign you in. Please try again.
+          Login is currently disabled. Please continue without signing in.
         </p>
         <Link
-          href="/auth/signin"
+          href="/"
           className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] bg-primary-500 text-white hover:bg-primary-600 shadow-sm hover:shadow h-10 px-4 py-2"
         >
-          Back to sign in
+          Back to Hook Library
         </Link>
       </div>
     </main>

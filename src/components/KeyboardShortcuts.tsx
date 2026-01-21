@@ -43,13 +43,6 @@ const shortcuts: Shortcut[] = [
     },
   },
   {
-    key: "d",
-    description: "Go to dashboard",
-    action: () => {
-      window.location.href = "/dashboard";
-    },
-  },
-  {
     key: "Escape",
     description: "Close modal/dialog",
     action: () => {

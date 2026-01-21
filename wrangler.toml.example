@@ -82,6 +82,7 @@ AI_MODEL_SIZE = "8b"
 AI_STREAMING = "false"
 NEXT_PUBLIC_SITE_URL = "https://adocavo.net"
 NEXT_PUBLIC_IMAGE_LOADER = "cloudflare"
+NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAACGnBBFNVERZrUsh"
 LOG_DRAIN_PROVIDER = "generic"
 LOG_LEVEL = "info"
 
@@ -135,6 +136,7 @@ AI_MODEL_SIZE = "8b"
 AI_STREAMING = "false"
 NEXT_PUBLIC_SITE_URL = "https://preview.adocavo.net"
 NEXT_PUBLIC_IMAGE_LOADER = "cloudflare"
+NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAACGnBBFNVERZrUsh"
 LOG_DRAIN_PROVIDER = "generic"
 
 # ============================================================================
@@ -159,6 +161,7 @@ AI_MODEL_SIZE = "8b"
 AI_STREAMING = "false"
 NEXT_PUBLIC_SITE_URL = "http://localhost:3000"
 NEXT_PUBLIC_IMAGE_LOADER = "cloudflare"
+NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAACGnBBFNVERZrUsh"
 LOG_DRAIN_PROVIDER = "generic"
 
 # ============================================================================
@@ -171,6 +174,7 @@ LOG_DRAIN_PROVIDER = "generic"
 # - GOOGLE_CLIENT_SECRET: From Google Cloud Console OAuth app
 # - GITHUB_CLIENT_ID: From GitHub Developer Settings OAuth app
 # - GITHUB_CLIENT_SECRET: From GitHub Developer Settings OAuth app
+# - TURNSTILE_SECRET_KEY: Cloudflare Turnstile secret key
 # - LOG_DRAIN_URL: Optional: URL for external log drain service
 # - LOG_DRAIN_TOKEN: Optional: Auth token for log drain service
 # - ALERT_WEBHOOK_URL: Optional: Webhook URL for alert notifications
