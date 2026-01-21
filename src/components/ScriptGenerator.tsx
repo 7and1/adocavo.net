@@ -81,7 +81,8 @@ export function ScriptGenerator({
 
   const isValid =
     productDescription.length >= 20 && productDescription.length <= 500;
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+  // Turnstile site key (public, safe to hardcode)
+  const siteKey = "0x4AAAAAACGnBBFNVERZrUsh";
 
   const handleGenerate = useCallback(async () => {
     if (!isValid) return;
