@@ -47,6 +47,7 @@ const cspDirectives = isProd
         "https://www.googletagmanager.com",
         "https://www.google-analytics.com",
         "https://*.googletagmanager.com",
+        "https://challenges.cloudflare.com", // Turnstile
       ].filter(Boolean),
       "style-src": ["'self'", "'unsafe-inline'"], // Required for styled-jsx
       "img-src": ["'self'", "data:", "https:", "blob:"],
@@ -56,8 +57,12 @@ const cspDirectives = isProd
         "https://www.google-analytics.com",
         "https://analytics.google.com",
         "https://*.googletagmanager.com",
+        "https://challenges.cloudflare.com", // Turnstile
       ],
-      "frame-src": ["https://www.googletagmanager.com"],
+      "frame-src": [
+        "https://www.googletagmanager.com",
+        "https://challenges.cloudflare.com", // Turnstile iframe
+      ],
       "frame-ancestors": ["'none'"],
       "object-src": ["'none'"],
       "manifest-src": ["'self'"],
