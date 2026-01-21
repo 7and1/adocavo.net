@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function SignInPage() {
   return (
     <main className="min-h-screen flex items-center justify-center px-4">
@@ -10,12 +12,12 @@ export default function SignInPage() {
           Adocavo is free to use without an account. Go back to the hook
           library to generate scripts.
         </p>
-        <a
+        <Link
           href="/"
           className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] bg-primary-500 text-white hover:bg-primary-600 shadow-sm hover:shadow h-10 px-4 py-2"
         >
           Back to Hook Library
-        </a>
+        </Link>
       </div>
     </main>
   );
