@@ -37,9 +37,16 @@ export function OnboardingTour() {
   const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [isActive, setIsActive] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const hasSeenTour = localStorage.getItem("hasSeenTour");
     const isNewUser = !session?.user?.email;
 
@@ -47,7 +54,7 @@ export function OnboardingTour() {
       const timer = setTimeout(() => setIsActive(true), 1500);
       return () => clearTimeout(timer);
     }
-  }, [session]);
+  }, [session, isClient]);
 
   useEffect(() => {
     if (!isActive) return;

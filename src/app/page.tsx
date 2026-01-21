@@ -75,21 +75,21 @@ export default function HomePage() {
       <OnboardingTour />
       <main id="main-content" className="container mx-auto px-4 py-8">
         <section className="mb-12">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm text-gray-500 shadow-sm">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col justify-center">
+              <div className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm text-gray-500 shadow-sm w-fit">
                 <span className="h-2 w-2 rounded-full bg-primary-500" />
                 50+ verified hook patterns
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4 mt-6">
                 Viral TikTok Hooks Library
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl lg:max-w-none mx-auto lg:mx-0 mb-6">
+              <p className="text-xl text-gray-600 mb-6">
                 Browse proven ad hooks and generate custom scripts instantly
                 with AI. Perfect for e-commerce sellers, marketers, and UGC
                 creators.
               </p>
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+              <div className="flex flex-wrap gap-3">
                 <Link
                   href="#browse"
                   prefetch
@@ -106,7 +106,7 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-            <div className="lg:pl-4">
+            <div>
               <Suspense fallback={<GeneratorSkeleton />}>
                 <GeneratorSection />
               </Suspense>
