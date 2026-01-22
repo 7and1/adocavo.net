@@ -46,17 +46,17 @@ export function HomepageGenerator({ hooks }: HomepageGeneratorProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
+    <div className="rounded-2xl border-2 border-primary-200 bg-white p-6 shadow-xl">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs uppercase tracking-wide text-primary-600 font-semibold">
             Free access
           </p>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900">
             Generate scripts instantly
           </h2>
         </div>
-        <span className="text-xs font-medium text-gray-500">
+        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
           Captcha verification required
         </span>
       </div>

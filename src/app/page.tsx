@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { HomepageGenerator } from "@/components/HomepageGenerator";
 import { HookGrid } from "@/components/HookGrid";
 import { HookGridSkeleton } from "@/components/skeletons";
@@ -74,43 +75,48 @@ export default function HomePage() {
       <Header />
       <OnboardingTour />
       <main id="main-content" className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <section className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm text-gray-500 shadow-sm mb-6">
+            <span className="h-2 w-2 rounded-full bg-primary-500" />
+            50+ verified hook patterns
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Viral TikTok Hooks Library
+          </h1>
+          <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
+            Browse proven ad hooks and generate custom scripts instantly with
+            AI. Perfect for e-commerce sellers, marketers, and UGC creators.
+          </p>
+        </section>
+
+        {/* Core Tool - Prominent & Centered */}
         <section className="mb-12">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div className="flex flex-col justify-center">
-              <div className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm text-gray-500 shadow-sm w-fit">
-                <span className="h-2 w-2 rounded-full bg-primary-500" />
-                50+ verified hook patterns
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 mt-6">
-                Viral TikTok Hooks Library
-              </h1>
-              <p className="text-xl text-gray-600 mb-6">
-                Browse proven ad hooks and generate custom scripts instantly
-                with AI. Perfect for e-commerce sellers, marketers, and UGC
-                creators.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="#browse"
-                  prefetch
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary-500 text-white font-medium shadow-sm hover:bg-primary-600 transition-colors"
-                >
-                  Browse Hooks · No Sign Up
-                </Link>
-                <Link
-                  href="/pricing"
-                  prefetch
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                >
-                  View Pricing
-                </Link>
+          <div className="max-w-2xl mx-auto">
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 rounded-3xl blur-lg opacity-30" />
+              <div className="relative">
+                <Suspense fallback={<GeneratorSkeleton />}>
+                  <GeneratorSection />
+                </Suspense>
               </div>
             </div>
-            <div>
-              <Suspense fallback={<GeneratorSkeleton />}>
-                <GeneratorSection />
-              </Suspense>
-            </div>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3 mt-6">
+            <Link
+              href="#browse"
+              prefetch
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary-500 text-white font-medium shadow-sm hover:bg-primary-600 transition-colors"
+            >
+              Browse Hooks · No Sign Up
+            </Link>
+            <Link
+              href="/pricing"
+              prefetch
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            >
+              View Pricing
+            </Link>
           </div>
         </section>
 
@@ -176,6 +182,7 @@ export default function HomePage() {
           </Link>
         </section>
       </main>
+      <Footer />
     </>
   );
 }
